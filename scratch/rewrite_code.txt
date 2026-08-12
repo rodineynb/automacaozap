@@ -1,0 +1,59 @@
+710:   }
+711: 
+712:   console.log(`[LLM Transcription] ✅ Transcrição concluída com ${geminiLLM.name}`);
+713:   return text;
+714: }
+715: 
+716: /**
+717:  * Reescreve uma mensagem base usando LLM com fallback automático.
+718:  * Mantém links, variáveis (como {{nome}}, {{primeiro_nome}}, {{produto}}) e sentido semântico intactos.
+719:  */
+720: export async function rewriteMessageViaLLM(
+721:   db: D1Database,
+722:   automationId: string,
+723:   baseMessage: string,
+724:   count = 1
+725: ): Promise<string[]> {
+726:   const systemPrompt = `Você é um redator de marketing altamente experiente. Sua tarefa é criar variações alternativas de uma mensagem de WhatsApp mantendo exatamente o mesmo objetivo, tom de voz, links e variáveis dinâmicas como {{nome}}, {{primeiro_nome}} e {{produto}}.
+727: Retorne exatamente ${count} variações, uma em cada linha, no formato de JSON array de strings.
+728: Exemplo de retorno esperado:
+729: ["variação 1", "variação 2", "variação 3"]
+730: 
+731: Não adicione explicações, comentários ou formatação Markdown (como \`\`\`json). Retorne APENAS o JSON de array de strings puro e válido.`;
+732: 
+733:   const userPrompt = `Mensagem Base:\n"""\n${baseMessage}\n"""`;
+734: 
+735:   try {
+736:     const response = await callLLM({
+737:       db,
+738:       automationId,
+739:       systemPrompt,
+740:       messages: [{ role: "user", content: userPrompt }]
+741:     });
+742: 
+743:     const content = response.content.trim();
+744:     const startIndex = content.indexOf('[');
+745:     const endIndex = content.lastIndexOf(']');
+746:     if (startIndex !== -1 && endIndex !== -1) {
+747:       const jsonStr = content.substring(startIndex, endIndex + 1);
+748:       const parsed = JSON.parse(jsonStr);
+749:       if (Array.isArray(parsed)) {
+750:         return parsed.map(s => s.trim());
+751:       }
+752:     }
+753:     
+754:     // Se o parse falhar, quebrar por quebra de linha se parecer uma lista
+755:     if (content.includes('\n')) {
+756:       const lines = content.split('\n').map(l => l.replace(/^[-*0-9.\s"']+|["'\s,]+$/g, '').trim()).filter(Boolean);
+757:       if (lines.length > 0) {
+758:         return lines.slice(0, count);
+759:       }
+760:     }
+761:     
+762:     return [baseMessage];
+763:   } catch (err) {
+764:     console.error("[LLM Rewrite] Erro ao reescrever mensagem:", err);
+765:     return [baseMessage];
+766:   }
+767: }
+768: 

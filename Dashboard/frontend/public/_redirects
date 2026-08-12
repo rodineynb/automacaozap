@@ -1,0 +1,2 @@
+/api/* https://dashboard-leads-api.projetobrlatam.workers.dev/api/:splat 200
+/* /index.html 200

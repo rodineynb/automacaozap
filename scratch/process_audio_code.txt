@@ -1,0 +1,130 @@
+311:         await executeTool(ctx, 'seq1', {});
+312:         return;
+313:       }
+314: 
+315:       // ── PASSO 2: Processar mídia se houver (OCR / Transcrição) ──
+316:       let processedText = message.textContent;
+317: 
+318:       if (message.messageType === 'image' && message.mediaId) {
+319:         processedText = await processImageWithFallback(ctx);
+320:       } else if (message.messageType === 'audio' && message.mediaId) {
+321:         processedText = await processAudioWithFallback(ctx);
+322:       } else if (message.messageType === 'document' && message.mediaId) {
+323:         processedText = await processDocumentWithFallback(ctx);
+324:       }
+325: 
+326:       if (!processedText || processedText.trim() === '') {
+327:         return;
+328:       }
+329: 
+330:       // ── INTERCEPTADOR DETERMINÍSTICO DE PAGAMENTO ────────────────
+331:       if (isDeterministicPayment(processedText, message.messageType)) {
+332:         console.log(`[Recheios] Interceptador determinístico de Pagamento ativado para ${contact.phone}`);
+333:         const audit = await validateAndExtractReceipt(processedText, ctx);
+334:         if (audit.isValid) {
+335:           console.log(`[Recheios] Comprovante válido (Valor: ${audit.value}). Registrando pagamento...`);
+336:           let dateStr = 'hoje';
+337:           const dateMatch = processedText.match(/• DATA DO PAGAMENTO:\s*([^\n\r]+)/);
+338:           if (dateMatch && dateMatch[1] && !dateMatch[1].includes('não')) {
+339:             dateStr = dateMatch[1].trim();
+340:           }
+341:           await executeTool(ctx, 'pagamento', {
+342:             valor_pagamento: audit.value,
+343:             pago: 'true',
+344:             data_comprovante: dateStr
+345:           });
+346:           return;
+347:         } else {
+348:           console.log(`[Recheios] Comprovante inválido ou imagem de suporte. Não abortando para permitir processamento pela LLM. Razão: ${audit.reason}`);
+349:         }
+350:       }
+351: 
+352:       // (Fixed Code Agent removed. Pre-payment phase is now processed entirely by LLM)
+353: 
+354: 
+355:       // ── PASSO 2.5 (PORTEIRO CRM): Verificar se um disparo de CRM foi enviado a este cliente ──
+356:       const hasCrmSent = await env.DB.prepare(
+357:         "SELECT id FROM crm_responses WHERE phone = ? AND automation_id = ? LIMIT 1"
+358:       ).bind(contact.phone, automation.id).first<{ id: string }>();
+359: 
+360:       // ── DETECTOR DETERMINÍSTICO DE ACEITE SIMPLES ────────────────
+361:       if (!state.seq2_called && isSimpleAcceptance(processedText)) {
+362:         console.log(`[Recheios] Interceptador determinístico de Aceite ativado para ${contact.phone}: "${processedText}"`);
+363:         await executeTool(ctx, 'seq2', {});
+364:         return;
+365:       }
+366: 
+367:       // ── PASSO 3: Roteamento ──
+368:       // 3a. Se há disparo de CRM ativo, rotear para o Agente CRM (fluxo separado)
+369:       if (hasCrmSent) {
+370:         console.log(`[Recheios] Roteamento para CRM Agent para ${contact.phone}`);
+371:         const crmOutput = await runCRMAgent(ctx, processedText);
+372:         if (crmOutput && crmOutput.trim() !== '') {
+373:           // Extrair apenas o texto conversacional (sem resultados técnicos de ferramentas)
+374:           const textPart = crmOutput.split('[Resultado Técnico das Ações]')[0].trim();
+375:           if (textPart) {
+376:             const formattedCrm = formatWhatsAppShortParagraphs(textPart);
+377:             await sendResponse(ctx, formattedCrm);
+378: 
+379:             // Auto-enviar botão Pix se a resposta mencionar dados do Pix
+380:             const upperText = textPart.toUpperCase();
+381:             if (upperText.includes('PIX') || upperText.includes('61982277206') || upperText.includes('CHAVE') || upperText.includes('R G FEITOSA')) {
+382:               try {
+383:                 await sendPixButton(env.DB, automation.whatsapp_api_id, contact.phone, '61982277206', 'PHONE', 'R G FEITOSA 153DF', env.KV);
+384:               } catch (pixErr) {
+385:                 console.error(`[CRM] Erro ao enviar botão Pix:`, pixErr);
+386:               }
+387:             }
+388:           }
+389:         }
+390:         return;
+391:       }
+392: 
+393:       // ── PASSO 3b: Agente Unificado (Vendas + Checkout + Suporte em um) ──
+394:       const lead = await env.DB.prepare(
+395:         'SELECT id, cliente_codigo FROM automation_leads WHERE phone = ? AND automation_id = ?'
+396:       ).bind(contact.phone, automation.id).first<{ id: string; cliente_codigo: number | null }>();
+397: 
+398:       const leadId = lead?.cliente_codigo ? String(lead.cliente_codigo) : (lead?.id || 'unknown');
+399:       const clientName = contact.name || state.client_name || 'amiga';
+400:       const attendantName = (automation as any).attendant_name || 'Julia';
+401: 
+402:       // Scout Classifier para enriquecer o contexto do agente
+403:       const intentTag = await runTriagemClassifier(ctx, processedText);
+404: 
+405:       // Se o classificador de intenções detectou aceitação e a seq2 ainda não foi chamada,
+406:       // executamos a entrega de receitas (seq2) diretamente para garantir robustez total.
+407:       if (intentTag === 'ACEITOU' && !state.seq2_called) {
+408:         console.log(`[Recheios] Interceptador Scout de Aceite ativado para ${contact.phone}. Executando seq2...`);
+409:         await executeTool(ctx, 'seq2', {});
+410:         return;
+411:       }
+412: 
+413:       if (intentTag === 'RECUSOU_UPSELL') {
+414:         const firstName = clientName.split(/\s+/)[0] || 'amiga';
+415:         if (state.access_delivered === 0) {
+416:           console.log(`[Recheios] RECUSOU_UPSELL (rejeitou Oferta Especial R$ 5) para ${contact.phone}.`);
+417:           // Disparar o estágio 'ticket_boost_declined' dinâmico ou fallback (Presente de Fidelidade)
+418:           const stageRes = await sendFunnelStage(
+419:             env.DB,
+420:             automation.whatsapp_api_id,
+421:             contact.phone,
+422:             automation,
+423:             contact,
+424:             state,
+425:             'ticket_boost_declined',
+426:             env.KV
+427:           );
+428: 
+429:           if (stageRes.sent) {
+430:             await saveAssistantMessages(env.DB, state.conversation_id, stageRes.messageLog);
+431:           } else {
+432:             // Fallback legado se desativado ou sem campos (Presente de Fidelidade)
+433:             const fallbackDownsell = `Tudo bem! O meu principal objetivo é te ajudar a crescer na confeitaria e faturar muito mais, a questão aqui não é só dinheiro. Por isso, de coração, eu vou te liberar todo o nosso *Kit Completo vitalício* de presente de qualquer forma! 💖🎁\n\nPara liberar seu cadastro no sistema, digite seu *Nome Completo* e seu melhor *E-mail* abaixo. 🎯`;
+434:             const formattedDownsell = fallbackDownsell
+435:               .replace(/Julia/g, attendantName)
+436:               .replace(/{{nome}}/g, contact.name || 'amiga')
+437:               .replace(/{nome}/g, contact.name || 'amiga');
+438:             await sendText(env.DB, automation.whatsapp_api_id, contact.phone, formattedDownsell, env.KV);
+439:             await saveAssistantMessages(env.DB, state.conversation_id, [formattedDownsell]);
+440:           }

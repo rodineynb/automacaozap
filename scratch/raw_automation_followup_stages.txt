@@ -1,0 +1,107 @@
+
+ ⛅️ wrangler 4.85.0 (update available 4.97.0)
+─────────────────────────────────────────────
+Resource location: remote 
+
+🌀 Executing on remote database whatsapp-platform (a24603e2-88a5-4cb4-854d-b87f03ad5ff0):
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+🚣 Executed 1 command in 0.20ms
+[
+  {
+    "results": [
+      {
+        "id": "b593a720-6118-4fab-a122-cdb77a3d74dc",
+        "name": "Vigia",
+        "key": "vigia",
+        "message": "*{{nome}}*, dá uma olhadinha no vídeo aqui em cima! 😍\n\nSei que o dia a dia é corrido, mas não queria que você perdesse a chance de mudar sua jornada com os doces.\n\nSó hoje, consigo liberar para você o nosso *Kit Completo de Confeitaria* — com videoaulas passo a passo, apostila de massas, bolos no pote e todas as atualizações de graça por apenas *R$ 19,90*!\n\n💰 *Pix (Celular):* 61982277206\n\nGostaria que eu te liberasse o acesso agora mesmo? 💕"
+      },
+      {
+        "id": "52b2e48f-eed8-4735-b315-f05ea51c32dd",
+        "name": "Finalizador",
+        "key": "finalizador",
+        "message": "*{{nome}}*, essa é a minha última mensagem por aqui pra não te incomodar, tá? Mas eu precisava te dar essa oportunidade final... 🙏\n\nVou liberar todo o nosso *Kit Completo* de Confeitaria, vitalício e com videoaulas por apenas *R$ 12,90* agora, Pix Cora.\n\n💰 *Chave Pix (Celular):* 61982277206\n\nÉ a sua última chance de começar a lucrar de verdade! Se quiser aproveitar, faz o Pix e me manda o comprovante aqui. Que Deus abençoe muito a sua jornada confeiteira! 🤗"
+      },
+      {
+        "id": "16493377-2387-4ad5-b7d2-fcb33a837a4d",
+        "name": "Incentivador",
+        "key": "incentivador",
+        "message": "*{{nome}}*, viu esse vídeo lindo de fatias que te mandei aqui em cima? 🍰😍\n\nSó de olhar já dá água na boca! Cada fatia dessa você vende facilmente por *R$ 8,00 a R$ 12,00* na sua vizinhança ou pelas redes sociais.\n\nOu seja, fazendo o Pix de apenas *R$ 10,00* pelas nossas receitas sem fogão (que economizam muito gás!), você recupera todo o seu investimento na venda de um único pedaço de bolo!\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nDá uma olhadinha nos arquivos que te mandei e me conta se ficou alguma dúvida! Estou torcendo muito pelo seu sucesso! 💕"
+      },
+      {
+        "id": "d5dd3e6a-3ad6-47e1-8849-1a9161de2fb1",
+        "name": "Cobrador Amigo",
+        "key": "cobrador_amigo",
+        "message": "Oi, *{{nome}}*! Tudo bem? Passando só pra te mandar um abraço e ver se deu certo de abrir as apostilas! 🤗\n\nSei bem que a nossa rotina na cozinha é uma loucura e às vezes a gente acaba esquecendo das coisas!\n\nEu confio muito na sua honestidade e no seu trabalho, tá? Quando tiver um tempinho, você pode fazer o Pix de *R$ 10,00* por aqui:\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nQualquer coisa me avisa, estou aqui! 💕"
+      },
+      {
+        "id": "78187a6d-85fb-48a2-aed5-aa2f1052bc6c",
+        "name": "Cobrador Curioso",
+        "key": "cobrador_curioso",
+        "message": "*{{nome}}*! Tudo bem? Menina, fiquei curiosa aqui... 🤭\n\nVocê conseguiu dar uma olhada na receita do *Recheio Cremoso de Ninho* ou no de *Chocolate Trufado* que estão na apostila 1? Eles não vão ao fogo e ficam absurdamente firmes!\n\nSei que a correria está grande, mas se puder dar aquela forcinha fazendo o Pix de *R$ 10,00* da nossa apostila, me ajuda muito a continuar produzindo esses materiais com tanto carinho!\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nUma semana abençoada pra você e boas fornadas! 🍰✨"
+      },
+      {
+        "id": "28e100b0-9279-40d9-8cd1-5f35479ad907",
+        "name": "Cobrador Final",
+        "key": "cobrador_final",
+        "message": "*{{nome}}*, estou passando pra te fazer a minha proposta final e te dar um presente de verdade para encerrarmos nossa conversa! 💕\n\nComo você já está com as receitas, se fizer o Pix de *R$ 12,00* hoje, eu vou te liberar de graça todo o nosso *Kit Completo de Confeitaria* (vitalício, com videoaulas, massas e brigadeiros sem fogo)!\n\nÉ isso mesmo: o Kit Completo que custa R$ 25,00 sai por apenas *R$ 12,00* pra você começar com o pé direito! Mas esse link expira *hoje à meia-noite*, tá?\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nFaz o Pix, me manda o comprovante aqui que eu te matriculo na hora com tudo liberado! Um abraço forte e muito sucesso na cozinha! 🤗"
+      },
+      {
+        "id": "801736c1-2756-48ba-8035-64403374d533",
+        "name": "Vigia",
+        "key": "vigia",
+        "message": "*{{nome}}*, dá uma olhadinha no vídeo aqui em cima! 😍\n\nSei que o dia a dia é corrido, mas não queria que você perdesse a chance de mudar sua jornada com os doces.\n\nSó hoje, consigo liberar para você o nosso *Kit Completo de Confeitaria* — com videoaulas passo a passo, apostila de massas, bolos no pote e todas as atualizações de graça por apenas *R$ 19,90*!\n\n💰 *Pix (Celular):* 61982277206\n\nGostaria que eu te liberasse o acesso agora mesmo? 💕"
+      },
+      {
+        "id": "3bdf548d-1da8-4273-ba82-5077d935920c",
+        "name": "Finalizador",
+        "key": "finalizador",
+        "message": "*{{nome}}*, essa é a minha última mensagem por aqui pra não te incomodar, tá? Mas eu precisava te dar essa oportunidade final... 🙏\n\nVou liberar todo o nosso *Kit Completo* de Confeitaria, vitalício e com videoaulas por apenas *R$ 12,90* agora, Pix Cora.\n\n💰 *Chave Pix (Celular):* 61982277206\n\nÉ a sua última chance de começar a lucrar de verdade! Se quiser aproveitar, faz o Pix e me manda o comprovante aqui. Que Deus abençoe muito a sua jornada confeiteira! 🤗"
+      },
+      {
+        "id": "f5775027-8620-4dfd-8ce3-8b8eed14ba4c",
+        "name": "Incentivador",
+        "key": "incentivador",
+        "message": "*{{nome}}*, viu esse vídeo lindo de fatias que te mandei aqui em cima? 🍰😍\n\nSó de olhar já dá água na boca! Cada fatia dessa você vende facilmente por *R$ 8,00 a R$ 12,00* na sua vizinhança ou pelas redes sociais.\n\nOu seja, fazendo o Pix de apenas *R$ 10,00* pelas nossas receitas sem fogão (que economizam muito gás!), você recupera todo o seu investimento na venda de um único pedaço de bolo!\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nDá uma olhadinha nos arquivos que te mandei e me conta se ficou alguma dúvida! Estou torcendo muito pelo seu sucesso! 💕"
+      },
+      {
+        "id": "c02454ee-e17b-485f-8f07-5bd5286b8ad7",
+        "name": "Cobrador Amigo",
+        "key": "cobrador_amigo",
+        "message": "Oi, *{{nome}}*! Tudo bem? Passando só pra te mandar um abraço e ver se deu certo de abrir as apostilas! 🤗\n\nSei bem que a nossa rotina na cozinha é uma loucura e às vezes a gente acaba esquecendo das coisas!\n\nEu confio muito na sua honestidade e no seu trabalho, tá? Quando tiver um tempinho, você pode fazer o Pix de *R$ 10,00* por aqui:\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nQualquer coisa me avisa, estou aqui! 💕"
+      },
+      {
+        "id": "1b39a187-3fea-4b7a-affb-2f9c8ad950b5",
+        "name": "Cobrador Curioso",
+        "key": "cobrador_curioso",
+        "message": "*{{nome}}*! Tudo bem? Menina, fiquei curiosa aqui... 🤭\n\nVocê conseguiu dar uma olhada na receita do *Recheio Cremoso de Ninho* ou no de *Chocolate Trufado* que estão na apostila 1? Eles não vão ao fogo e ficam absurdamente firmes!\n\nSei que a correria está grande, mas se puder dar aquela forcinha fazendo o Pix de *R$ 10,00* da nossa apostila, me ajuda muito a continuar produzindo esses materiais com tanto carinho!\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nUma semana abençoada pra você e boas fornadas! 🍰✨"
+      },
+      {
+        "id": "f69630c1-dee0-4617-bd89-494c98fb2351",
+        "name": "Cobrador Final",
+        "key": "cobrador_final",
+        "message": "*{{nome}}*, estou passando pra te fazer a minha proposta final e te dar um presente de verdade para encerrarmos nossa conversa! 💕\n\nComo você já está com as receitas, se fizer o Pix de *R$ 10,00* hoje, eu vou te liberar de graça todo o nosso *Kit Completo de Confeitaria* (vitalício, com videoaulas, massas e brigadeiros sem fogo)!\n\nÉ isso mesmo: o Kit Completo que custa R$ 25,00 sai por apenas *R$ 10,00* pra você começar com o pé direito! Mas esse link expira *hoje à meia-noite*, tá?\n\n💰 *Pix (Celular):* 61982277206\n*Destinatário:* R G FEITOSA 153DF\n\nFaz o Pix, me manda o comprovante aqui que eu te matriculo na hora com tudo liberado! Um abraço forte e muito sucesso na cozinha! 🤗"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "ENAM",
+      "served_by_colo": "MIA",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.2021
+      },
+      "duration": 0.2021,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 60301312,
+      "rows_read": 12,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]
+
+
+STDERR:

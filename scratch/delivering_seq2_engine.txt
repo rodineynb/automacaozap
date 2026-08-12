@@ -1,0 +1,65 @@
+1366:     console.log(`[AutomationEngine] Mensagem processada com sucesso para ${phone}/${slug}`);
+1367:   } catch (error) {
+1368:     const errorMsg = error instanceof Error ? error.message : String(error);
+1369:     console.error(`[AutomationEngine] Erro ao processar mensagem:`, errorMsg);
+1370: 
+1371:     await logError(db, automation.id, 'processing_error', errorMsg);
+1372:   } finally {
+1373:     // ─── LIBERAÇÃO DO LOCK & ENCADERNAÇÃO DE FILA ───
+1374:     try {
+1375:       const processingKey = `processing:${slug}:${phone}`;
+1376:       const hasQueuedKey = `has_queued_messages:${slug}:${phone}`;
+1377:       const queueKey = `queue:${slug}:${phone}`;
+1378: 
+1379:       // Se a Sequência 2 estiver sendo entregue de forma assíncrona passo-a-passo,
+1380:       // manter o lock ativo e não processar a fila agora (a última etapa fará o cleanup).
+1381:       const isDeliveringSeq2Key = `is_delivering_seq2:${slug}:${phone}`;
+1382:       const isDeliveringSeq2 = await env.KV.get(isDeliveringSeq2Key);
+1383:       if (isDeliveringSeq2 === "true") {
+1384:         console.log(`[AutomationEngine] Envio de Sequência 2 em progresso para ${phone}/${slug}. Mantendo lock ativo.`);
+1385:         return;
+1386:       }
+1387: 
+1388:       const hasQueued = await env.KV.get(hasQueuedKey);
+1389: 
+1390:       if (hasQueued === "true") {
+1391:         // Remover flag de fila
+1392:         await env.KV.delete(hasQueuedKey);
+1393: 
+1394:         // Mover as mensagens da fila temporária de volta para o debounce
+1395:         const qMessages = await env.KV.get(queueKey, "json") as IncomingMessage[] | null;
+1396:         if (qMessages && qMessages.length > 0) {
+1397:           await env.KV.delete(queueKey);
+1398: 
+1399:           const dbKey = `debounce:${slug}:${phone}`;
+1400:           await env.KV.put(dbKey, JSON.stringify(qMessages), { expirationTtl: 60 });
+1401: 
+1402:           console.log(`[AutomationEngine] Detectadas mensagens enfileiradas para ${phone}/${slug}. Agendando processamento sequencial pós-delay.`);
+1403: 
+1404:           // Agendar nova execução com delay curto (ex: 2 segundos de respiro) para evitar overlapping de mídias/copies
+1405:           const runQueuedAsync = async () => {
+1406:             await new Promise((resolve) => setTimeout(resolve, 2000));
+1407:             await processMessageAsync(env, automation, phone, slug);
+1408:           };
+1409: 
+1410:           console.log(`[AutomationEngine] Executando fila sequencial de forma síncrona pós-sleep para garantir VM ativa...`);
+1411:           await runQueuedAsync();
+1412: 
+1413:           // Nota: Retornamos mantendo o lock ativo no KV para que novas chegadas continuem retidas!
+1414:           return;
+1415:         }
+1416:       }
+1417: 
+1418:       // Se não houver mais mensagens enfileiradas, deletar o lock de processamento de vez
+1419:       await env.KV.delete(processingKey);
+1420:       console.log(`[AutomationEngine] Lock de processamento finalizado e liberado para ${phone}/${slug}`);
+1421: 
+1422:     } catch (cleanupError) {
+1423:       console.error(`[AutomationEngine] Erro no cleanup do mutex:`, cleanupError);
+1424:     }
+1425:   }
+1426: }
+1427: 
+1428: // ─────────────────────────────────────────────
+1429: //  Helpers
+1430: // ─────────────────────────────────────────────

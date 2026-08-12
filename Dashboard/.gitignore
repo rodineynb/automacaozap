@@ -1,0 +1,21 @@
+# Credenciais — NUNCA commitar
+.env
+.env.local
+.env.production
+worker/.dev.vars
+
+# Dependências
+node_modules/
+frontend/node_modules/
+worker/node_modules/
+
+# Build
+frontend/dist/
+worker/dist/
+
+# Cloudflare
+.wrangler/
+
+# OS
+.DS_Store
+Thumbs.db

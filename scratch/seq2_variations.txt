@@ -1,0 +1,70 @@
+691:         const text1Variations = [
+692:           `*${firstName}*, acabei de te enviar as *200 receitas de recheios a frio* que te prometi! Elas vão *transformar qualquer docinho simples* em uma verdadeira obra de arte lucrativa. Dá uma olhadinha nos arquivos acima! 🍰✨`,
+693:           `Prontinho, *${firstName}*! As suas *200 receitas de recheios a frio* já estão aí em cima. Preparei esse material com muito carinho para te ajudar a *mudar o nível dos seus doces* de forma prática! 😍🍰`,
+694:           `Tudo enviado com muito carinho, *${firstName}*! Estão aí em cima as *200 receitas de recheios a frio* que vão te ajudar a economizar muito gás e *multiplicar as suas encomendas* de forma simples e rápida! 🚀🍰`,
+695:           `Já estão em suas mãos, *${firstName}*! As *200 receitas de recheios a frio* foram enviadas com sucesso aqui em cima. Elas são a chave para você *faturar muito mais* na cozinha com total praticidade! 🧁✨`,
+696:           `Receitas na mão, *${firstName}*! Acabei de carregar as *200 receitas de recheios a frio* especiais aí em cima para você. Tenho certeza de que você vai amar a textura e a praticidade de cada uma delas! 😍💖`
+697:         ];
+698:         const text1 = text1Variations[Math.floor(Math.random() * text1Variations.length)];
+699: 
+700:         console.log(`[Seq2] Enviando Texto 1 para ${phone}`);
+701:         const pText1 = sendText(db, whatsappApiId, phone, text1, kv);
+702:         allPromises.push(pText1);
+703:         await saveAssistantMessages(db, state.conversation_id, [text1]);
+704: 
+705:         // Delay de 1.5s
+706:         await sleep(1500);
+707: 
+708:         // 3. Enviar Áudio 2
+709:         const audioUrl = 'https://dados.promentor21.top/Funil%20Recheios/audio2-v3.mp3';
+710:         console.log(`[Seq2] Enviando Áudio 2 para ${phone}`);
+711:         const pAudio = sendAudio(db, whatsappApiId, phone, audioUrl, kv);
+712:         allPromises.push(pAudio);
+713:         await saveAssistantMessages(db, state.conversation_id, ['[Áudio de entrega enviado]']);
+714: 
+715:         // Delay de 1.5s
+716:         await sleep(1500);
+717: 
+718:         // 4. Enviar Texto 2 (Pix Details)
+719:         const text2 = `📋 *DADOS DO PIX*:\n\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX: *61982277206*`;
+720:         console.log(`[Seq2] Enviando Dados Pix para ${phone}`);
+721:         const pText2 = sendText(db, whatsappApiId, phone, text2, kv);
+722:         allPromises.push(pText2);
+723:         await saveAssistantMessages(db, state.conversation_id, [text2]);
+724: 
+725:         // Delay de 1.5s
+726:         await sleep(1500);
+727: 
+728:         // 5. Enviar Imagens de Preços e Bônus
+729:         const images = [
+730:           { url: 'https://dados.promentor21.top/Funil%20Recheios/img2.jpeg', caption: `1️⃣ PACOTE 1: RECHEIOS A FRIO (O Pontapé Ideal) \n✅ +200 receitas cremosas sem precisar de fogão ou forno. \n💰 Apenas R$ 10,00!  \n\n2️⃣ PACOTE 2: RECHEIOS + MASSAS (Qualidade que Encanta) \n✅ Tudo do Pacote 1 + massas fofinhas e estruturadas para bolos e fatias. \n💰 Apenas R$ 15,00! (Só R$ 5,00 a mais para elevar seu nível!)  \n\n3️⃣ PACOTE 3: KIT COMPLETO (Tudo para Arrasar - O MAIS ESCOLHIDO! ⭐) \n✅ Tudo dos pacotes anteriores + Vídeo Aulas, Brigadeiros, Geladinhos, Pipocas Gourmet, Copos da Felicidade e Bônus Exclusivos! \n💰 Por apenas R$ 25,00!` },
+731:           { url: 'https://dados.promentor21.top/Funil%20Recheios/img-bonus.jpeg', caption: `🎁 *Bônus Exclusivos no Pacote 3*:\n\n- *Caseirinho (Bolos Caseiros Lucrativos)*\n- *Método Fatias de Feira* — As receitas mais *vendidas* aqui comigo, *que minhas clientes amam*!\n- *Estratégia de Vendas para os Primeiros 30 Dias* — Passo a passo para você *vender mais rápido* e ter sucesso logo de cara!` }
+732:         ];
+733: 
+734:         console.log(`[Seq2] Enviando 2 imagens em paralelo para ${phone}`);
+735:         const imgPromises = images.map((img, idx) => 
+736:           sendImage(db, whatsappApiId, phone, img.url, img.caption, kv)
+737:             .then(() => saveAssistantMessages(db, state.conversation_id, [img.caption ? `[Imagem enviada com legenda: ${img.caption}]` : `[Imagem enviada]`]))
+738:         );
+739:         allPromises.push(...imgPromises);
+740: 
+741:         // Delay de 1.5s
+742:         await sleep(1500);
+743: 
+744:         // 6. Enviar Texto Final (5 variações premium)
+745:         const textFinalVariations = [
+746:           `E o melhor de tudo: o Pacote Completo é sempre atualizado com novas tendências, e quem escolhe o Pacote 3 ganha *acesso vitalício* para sempre! Ou seja, você nunca mais precisará gastar com outras apostilas na vida! 😍\n\nAgora é com você: escolha o pacote ideal para começar hoje mesmo e me envie o comprovante do PIX aqui embaixo. Eu libero seu acesso na mesma hora! Não deixe essa chance passar! 🚀`,
+747:           `Lembrando que o nosso Pacote Completo recebe novidades constantemente, e garantindo o Pacote 3 você tem *acesso vitalício* a todas elas! É um investimento único para o resto da vida! 🧁💖\n\nEscolha o pacote que mais se encaixa no seu momento agora e me mande o comprovante do PIX logo abaixo para eu liberar seu cadastro na hora! A hora de começar a lucrar é agora! 🎯`,
+748:           `O legal é que o Pacote Completo é atualizado direto com novas receitas, e garantindo o Pacote 3 hoje você garante o *acesso vitalício* sem nenhuma mensalidade! É tudo seu para sempre! 🍰🌟\n\nSelecione o pacote perfeito para você e envie o comprovante do PIX aqui no chat. Eu faço a sua matrícula na mesma hora! Aproveite essa oportunidade de ouro! 🚀`,
+749:           `Tenho orgulho de dizer que o nosso material vive recebendo novas atualizações de mercado, e quem adquire o Pacote 3 tem direito a todas elas com *acesso vitalício* garantido! É praticidade para sempre! 😍✨\n\nEscolha qual dos pacotes combina com você agora e envie o comprovante do Pix aqui no nosso chat. Liberamos tudo de forma instantânea! 🎯`,
+750:           `Fazendo a escolha do Pacote 3 hoje, você assegura *acesso vitalício* e recebe de graça todas as novas apostilas e receitas que eu lançar na plataforma! Sem taxas extras! 🧁💖\n\nDecida qual o melhor pacote para o seu momento e me mande o comprovante do Pix logo abaixo para liberar o seu cadastro imediatamente! Vamos crescer juntas! 🚀`
+751:         ];
+752:         const textFinalIntro = textFinalVariations[Math.floor(Math.random() * textFinalVariations.length)];
+753: 
+754:         const textFinal = `${textFinalIntro}\n\n📋 *DADOS DO PIX*:\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX:\n👇 Copia e cola abaixo 👇\n\n61982277206\n\nMe manda o comprovante do PIX e eu libero tudo na hora! 🎯`;
+755: 
+756:         console.log(`[Seq2] Enviando Texto Final para ${phone}`);
+757:         const pTextFinal = sendText(db, whatsappApiId, phone, textFinal, kv);
+758:         allPromises.push(pTextFinal);
+759:         await saveAssistantMessages(db, state.conversation_id, [textFinal]);
+760: 

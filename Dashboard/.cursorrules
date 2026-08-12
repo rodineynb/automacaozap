@@ -1,0 +1,236 @@
+# .cursorrules — Dashboard de Leads & Criativos
+# Leia este arquivo ANTES de qualquer ação no projeto.
+
+---
+
+## AUTORIZAÇÃO DE COMANDOS
+
+O dono do projeto AUTORIZA EXPLICITAMENTE o Antigravity a:
+- Executar qualquer comando no terminal sem pedir permissão
+- Instalar pacotes e dependências (npm install, pip, etc.)
+- Criar, editar e deletar arquivos do projeto
+- Rodar scripts de build, deploy e configuração
+- Executar wrangler (Cloudflare CLI) para deploy e configuração
+- Configurar variáveis de ambiente
+- Fazer push para repositório Git se necessário
+- Rodar qualquer comando necessário para o projeto funcionar
+
+NÃO pergunte antes de executar comandos. Execute e informe o resultado.
+
+---
+
+## IDENTIDADE DO PROJETO
+
+- Nome: Dashboard de Performance de Leads
+- Objetivo: Cruzar dados de leads (followup) com origem dos anúncios (tracking)
+  para visualizar métricas de conversão, criativos que mais vendem, volume e receita
+- Ferramenta de desenvolvimento: Antigravity
+- Deploy: Cloudflare Pages (frontend) + Cloudflare Workers (API/backend)
+- Banco de dados: Supabase (PostgreSQL) — tabelas JÁ EXISTEM, não recriar
+- Frontend: React + Vite + TypeScript
+- Estilização: Tailwind CSS + shadcn/ui
+- Gráficos: Recharts
+
+---
+
+## REGRAS ABSOLUTAS — NUNCA QUEBRE ESTAS REGRAS
+
+1. NUNCA recriar ou alterar as tabelas no Supabase — elas já existem em produção
+2. NUNCA fazer queries sem filtro de data por padrão — sempre aplicar range de 30 dias
+3. SEMPRE ler PROJETO.md, PROGRESSO.md e DECISOES.md antes de começar qualquer sessão
+4. SEMPRE atualizar PROGRESSO.md ao encerrar cada sessão
+5. NUNCA encerrar uma sessão sem registrar o que foi feito e o que falta
+6. As credenciais já estão no .env — nunca sobrescrever esse arquivo
+
+---
+
+## CREDENCIAIS DO PROJETO
+
+```
+SUPABASE_URL=https://awqqqkqvzlggczcoawvi.supabase.co
+SUPABASE_ANON_KEY=RENOVAR_APOS_TESTES
+
+CLOUDFLARE_API_TOKEN=RENOVAR_APOS_TESTES
+CLOUDFLARE_ACCOUNT_ID=58e12f4d07f70db12cb7ba2d78e3d384
+```
+
+Use os valores reais do arquivo .env na raiz do projeto.
+
+---
+
+## TABELAS DO SUPABASE (somente leitura)
+
+### Tabela: bd_recheios_followup
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| session_id | text | ID da sessão |
+| telefone | text | ⭐ chave de join com tracking |
+| nome | text | nome do lead |
+| produto | text | produto de interesse |
+| pago | boolean | TRUE = converteu |
+| clicou_url | boolean | clicou no link enviado |
+| recebeu_acesso | boolean | recebeu acesso ao produto |
+| nivel_followup | int | nível atual do followup |
+| finalizado | boolean | atendimento encerrado |
+| created_at | timestamp | data de entrada do lead |
+| data_ultima_mensagem | timestamp | última interação |
+| email | text | email do lead |
+
+### Tabela: tracking_zap_face
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| telefone | text | ⭐ chave de join com followup |
+| campanha | text | nome da campanha |
+| conjunto_anuncio | text | nome do conjunto |
+| anuncio | text | nome do criativo (ex: AD3, AD8) |
+| anuncio_id | text | ID do anúncio |
+| campanha_id | text | ID da campanha |
+| titulo | text | título do anúncio |
+| tipo_anuncio | text | tipo (video, imagem) |
+| data_entrada | timestamp | quando o lead entrou |
+| created_at | timestamp | timestamp de registro |
+
+---
+
+## JOIN PRINCIPAL
+
+```sql
+SELECT
+  f.telefone, f.nome, f.pago, f.produto,
+  f.created_at as data_lead, f.clicou_url, f.recebeu_acesso,
+  t.campanha, t.anuncio, t.conjunto_anuncio, t.titulo, t.tipo_anuncio
+FROM bd_recheios_followup f
+LEFT JOIN tracking_zap_face t ON f.telefone = t.telefone
+WHERE f.created_at >= NOW() - INTERVAL '30 days'
+```
+
+---
+
+## MÉTRICAS DO DASHBOARD
+
+1. Total de leads no período
+2. Taxa de conversão (pago=true / total * 100)
+3. Total de leads pagantes
+4. Total que clicou na URL
+5. Criativos que mais geraram vendas (ranking)
+6. Volume de leads por dia (gráfico de linha)
+7. Campanhas com melhor taxa de conversão
+8. Funil: lead → clicou → pagou
+
+---
+
+## FILTROS DO DASHBOARD
+
+- Período (date range picker) — padrão: últimos 30 dias
+- Campanha (multiselect)
+- Criativo/Anúncio (multiselect)
+- Produto (select)
+- Status de pagamento (todos / pago / não pago)
+
+Todos os filtros se aplicam simultaneamente a todos os cards e gráficos.
+
+---
+
+## STACK TÉCNICA
+
+| Camada | Tecnologia |
+|--------|-----------|
+| Frontend | React 18 + Vite + TypeScript |
+| UI | shadcn/ui |
+| Estilização | Tailwind CSS |
+| Gráficos | Recharts |
+| Backend | Hono + Cloudflare Workers |
+| Banco | Supabase (@supabase/supabase-js) |
+| Deploy Frontend | Cloudflare Pages |
+| Deploy Backend | Cloudflare Workers |
+
+---
+
+## ROTAS DA API (Worker)
+
+| Rota | Descrição |
+|------|-----------|
+| GET /api/metrics | Cards: total leads, pagos, taxa conversão, clicaram |
+| GET /api/criativos | Ranking de criativos por vendas |
+| GET /api/leads-por-dia | Volume de leads agrupado por dia |
+| GET /api/campanhas | Performance por campanha |
+| GET /api/funil | Dados do funil lead→clicou→pagou |
+| GET /api/leads | Listagem paginada |
+| GET /api/filtros | Listas para os selects |
+
+Todos os endpoints aceitam: `data_inicio`, `data_fim`, `campanha`, `anuncio`, `produto`, `pago`
+
+---
+
+## ESTRUTURA DE PASTAS
+
+```
+dashboard-leads/
+├── .cursorrules
+├── .env                  ← credenciais reais (não commitar)
+├── .env.example
+├── .gitignore
+├── PROJETO.md
+├── PROGRESSO.md
+├── DECISOES.md
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   ├── MetricCard.tsx
+│   │   │   ├── LeadsChart.tsx
+│   │   │   ├── CriativosChart.tsx
+│   │   │   ├── CampanhasChart.tsx
+│   │   │   ├── FunnelChart.tsx
+│   │   │   ├── LeadsTable.tsx
+│   │   │   └── Filters.tsx
+│   │   ├── hooks/
+│   │   │   ├── useMetrics.ts
+│   │   │   ├── useFilters.ts
+│   │   │   └── useLeads.ts
+│   │   ├── lib/
+│   │   │   └── api.ts
+│   │   ├── types/index.ts
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   └── package.json
+└── worker/
+    ├── src/
+    │   ├── index.ts
+    │   ├── lib/supabase.ts
+    │   └── routes/
+    │       ├── metrics.ts
+    │       ├── criativos.ts
+    │       ├── leads.ts
+    │       ├── campanhas.ts
+    │       ├── funil.ts
+    │       └── filtros.ts
+    ├── wrangler.toml
+    └── package.json
+```
+
+---
+
+## PRIMEIRO COMANDO PARA INICIAR
+
+Cole este comando no Antigravity para começar:
+
+```
+Leia .cursorrules, PROJETO.md, PROGRESSO.md e DECISOES.md.
+
+Você tem autorização total para executar qualquer comando no terminal sem pedir permissão.
+
+Inicie a Fase 1 completa:
+1. Crie toda a estrutura de pastas do projeto
+2. Configure frontend/ com Vite + React + TypeScript + Tailwind + shadcn/ui
+3. Configure worker/ com Hono + wrangler.toml
+4. Crie .env com as credenciais do .cursorrules e .gitignore protegendo o .env
+5. Implemente todas as rotas da API no worker conectando ao Supabase
+6. Implemente todos os componentes do dashboard no frontend
+7. Faça o build e teste localmente (npm run dev)
+8. Faça o deploy no Cloudflare Pages e Workers via wrangler
+
+Execute tudo sem parar para pedir confirmação. Ao terminar, atualize PROGRESSO.md.
+```

@@ -1,0 +1,210 @@
+
+ ⛅️ wrangler 4.85.0 (update available 4.97.0)
+─────────────────────────────────────────────
+Resource location: remote 
+
+🌀 Executing on remote database whatsapp-platform (a24603e2-88a5-4cb4-854d-b87f03ad5ff0):
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+🚣 Executed 1 command in 0.31ms
+[
+  {
+    "results": [
+      {
+        "id": "9ac855ba-af33-40e8-a869-bb75968d0a2a",
+        "type": "audio",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/audio1-v4.mp3"
+      },
+      {
+        "id": "2591dfd4-36b9-4ba6-8ca1-5392875e7e18",
+        "type": "text",
+        "content": "Oi, *{primeiro_nome}*! Tudo bem? Aqui é a Julia 😊\n\nVou te liberar agora as *200 receitas de recheios a frio* especiais!\n\nVocê confere primeiro e, se estiver tudo certo, depois faz o pagamento de *R$ 10,00.*\n\nE, se quiser ir além, depois eu também posso te mostrar o pacote completo — com receitas de tortinhas, Fatias de Feira mais vendidas, videoaulas e muito mais... 🍰\n\n👇 *Posso te enviar agora?* 🙏"
+      },
+      {
+        "id": "95bd6f2a-0b93-4130-a3ec-59262540d355",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%205.%20Recheios%20Sem%20Fog%C3%A3o%20(101%20Receitas).pdf"
+      },
+      {
+        "id": "eb8a735b-1ae7-4d1e-be5e-a3606f6acc8d",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%201.%20Recheios%20Sem%20Fog%C3%A3o%20(50%20Receitas).pdf"
+      },
+      {
+        "id": "5e31f629-da87-4b97-aff8-92ddd34cd3bc",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%203.%20Recheios%20Sem%20Fog%C3%A3o%20(20%20Receitas).pdf"
+      },
+      {
+        "id": "46c94d85-0fe9-4792-973d-ac7301577de4",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%204.%20Recheios%20Sem%20Fog%C3%A3o%20(23%20Receitas).pdf"
+      },
+      {
+        "id": "2ba468b6-5ec1-4e10-ae64-6bec276e59a6",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%202.%20Recheios%20Sem%20Fog%C3%A3o%20(34%20Receitas).pdf"
+      },
+      {
+        "id": "c48b3e09-0a5c-40fd-9655-9562f74f3ab6",
+        "type": "text",
+        "content": "*{primeiro_nome}*, acabei de te enviar as *200 receitas de recheios a frio* que te prometi! Elas vão *transformar qualquer docinho simples* em uma verdadeira obra de arte lucrativa. Dá uma olhadinha nos arquivos acima! 🍰✨"
+      },
+      {
+        "id": "5290d7cb-9f1c-46f7-bdf3-220fcdd64a9f",
+        "type": "audio",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/audio2-v3.mp3"
+      },
+      {
+        "id": "dbb3db57-0d3a-403d-8c9b-df7dc965cb5a",
+        "type": "text",
+        "content": "📋 *DADOS DO PIX*:\n\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX: *61982277206*"
+      },
+      {
+        "id": "7ea04fe0-23cc-4e9f-b411-4437464f6fe9",
+        "type": "image",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/img2.jpeg"
+      },
+      {
+        "id": "73a7806f-478d-49e1-8729-59571726209e",
+        "type": "image",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/img-bonus.jpeg"
+      },
+      {
+        "id": "8418667b-2e5a-42dc-b3fc-8b5d05d18142",
+        "type": "text",
+        "content": "E o melhor de tudo: o Pacote Completo é sempre atualizado com novas tendências, e quem escolhe o Pacote 3 ganha *acesso vitalício* para sempre! Ou seja, você nunca mais precisará gastar com outras apostilas na vida! 😍\n\nAgora é com você: escolha o pacote ideal para começar hoje mesmo e me envie o comprovante do PIX aqui embaixo. Eu libero seu acesso na mesma hora! Não deixe essa chance passar! 🚀\n\n📋 *DADOS DO PIX*:\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX:\n👇 Copia e cola abaixo 👇\n\n61982277206\n\nMe manda o comprovante do PIX e eu libero tudo na hora! 🎯"
+      },
+      {
+        "id": "aa62c441-e5f1-4042-a349-1659664afcf4",
+        "type": "text",
+        "content": "*{primeiro_nome}*, seu pagamento de *R$ {valor_pago}* foi confirmado com sucesso! 🎉😍\n\n*{primeiro_nome}*, tenho uma surpresa super especial pra você! 🎁\n\nPor apenas mais *R$ 5,00* você leva o nosso *Kit Completo de Confeitaria* (que custa R$ 25,00)!\n\nNo kit completo você recebe:\n📹 Vídeo aulas passo a passo com o ponto certo dos recheios\n📚 Apostilas extras de brigadeiros premium, bolos no pote e geladinhos gourmet\n🍰 Método Como Ganhar Dinheiro com Fatias de Bolo\nE muito mais!\n\nÉ só fazer o PIX de *R$ 5,00* para o mesmo número celular:\n💰 *Chave PIX:* 61982277206\n\nSe preferir ficar apenas com as receitas que escolheu, basta digitar *\"não quero\"* ou *\"só as receitas\"* que já te peço os dados de acesso. O que você acha? 😊"
+      },
+      {
+        "id": "bff58d82-9571-48e5-8e4c-84ee61ca87bf",
+        "type": "image",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/img_upssel.png"
+      },
+      {
+        "id": "da0e3c03-09d7-4fa1-bf2f-85c2abea85fe",
+        "type": "text",
+        "content": "*{primeiro_nome}*, espero que você já esteja amando e aproveitando cada pedacinho da nossa área de membros! 😍🍰\n\nBut deixa eu te falar uma verdade sincera que eu aprendi na prática: de que adianta ter as receitas de recheios mais incríveis e cremosas do Brasil se a sua cozinha continuar vazia e sem encomendas? 🍰🤔 Ter receitas perfeitas é só metade do caminho. A outra metade — e a mais importante — é saber como atrair clientes prontos para comprar de você todos os dias!\n\nFoi por isso que eu criei o meu treinamento completo *Máquina de Vendas Online*! Nele, eu te entrego o roteiro exato para você usar o seu celular e o Instagram para lotar a sua agenda de clientes na sua cidade, mesmo que você esteja começando do absoluto zero e não queira gastar dinheiro com anúncios!\n\nEle é vendido normalmente por R$ 89,90, mas como você acabou de entrar para o nosso time, hoje eu consigo te liberar o acesso vitalício por apenas *R$ 14,50* adicionais!\n\nCaso você queira garantir essa oportunidade única, basta fazer o Pix de *R$ 14,50* abaixo e me enviar o comprovante aqui que eu te libero o acesso na hora! 🎯\n\n💰 *Pix (Celular):* 61982277206"
+      },
+      {
+        "id": "938f1f3a-4e0b-4200-b05d-829d7f5e53dc",
+        "type": "text",
+        "content": "Tudo bem! O meu principal objetivo é te ajudar a crescer na confeitaria e faturar muito mais, a questão aqui não é só dinheiro. Por isso, de coração, eu vou te liberar todo o nosso *Kit Completo vitalício* de presente de qualquer forma! 💖🎁\n\nPara liberar seu cadastro no sistema, digite seu *Nome Completo* e seu melhor *E-mail* abaixo. 🎯"
+      },
+      {
+        "id": "07e61db9-3141-40ee-a054-b8b693053dfd",
+        "type": "audio",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/audio1-v4.mp3"
+      },
+      {
+        "id": "02f91203-c136-4c6d-93e6-80941d5e4343",
+        "type": "text",
+        "content": "Oi, *{primeiro_nome}*! Tudo bem? Aqui é a Julia 😊\n\nVou te liberar agora as *200 receitas de recheios a frio* especiais!\n\nVocê confere primeiro e, se estiver tudo certo, depois faz o pagamento de *R$ 10,00.*\n\nE, se quiser ir além, depois eu também posso te mostrar o pacote completo — com receitas de tortinhas, Fatias de Feira mais vendidas, videoaulas e muito mais... 🍰\n\n👇 *Posso te enviar agora?* 🙏"
+      },
+      {
+        "id": "dc376b58-8568-4a6a-8756-7c8aaec796fd",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%205.%20Recheios%20Sem%20Fog%C3%A3o%20(101%20Receitas).pdf"
+      },
+      {
+        "id": "28dcbead-3833-4589-a1d4-71ebc2898e37",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%201.%20Recheios%20Sem%20Fog%C3%A3o%20(50%20Receitas).pdf"
+      },
+      {
+        "id": "12a9c086-044f-4f6a-b949-22c5b5868b51",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%203.%20Recheios%20Sem%20Fog%C3%A3o%20(20%20Receitas).pdf"
+      },
+      {
+        "id": "51601d68-37fa-4d76-9ac0-f29f041c0213",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%204.%20Recheios%20Sem%20Fog%C3%A3o%20(23%20Receitas).pdf"
+      },
+      {
+        "id": "9a1f7749-243f-4167-88e8-0fece15f1035",
+        "type": "document",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/Apostila%202.%20Recheios%20Sem%20Fog%C3%A3o%20(34%20Receitas).pdf"
+      },
+      {
+        "id": "24cd3107-8bc2-48b8-a35d-d94a81bef79d",
+        "type": "text",
+        "content": "*{primeiro_nome}*, acabei de te enviar as *200 receitas de recheios a frio* que te prometi! Elas vão *transformar qualquer docinho simples* em uma verdadeira obra de arte lucrativa. Dá uma olhadinha nos arquivos acima! 🍰✨"
+      },
+      {
+        "id": "c47bc8c8-654a-48c4-b501-b67443027a44",
+        "type": "audio",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/audio2-v3.mp3"
+      },
+      {
+        "id": "b387c892-4be1-4cdd-9658-7d386e98336f",
+        "type": "text",
+        "content": "📋 *DADOS DO PIX*:\n\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX: *61982277206*"
+      },
+      {
+        "id": "c87b6140-0040-41c6-88c3-8208d50cdea1",
+        "type": "image",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/img2.jpeg"
+      },
+      {
+        "id": "e3c319a3-f26f-46a7-9fcb-047bbb285b03",
+        "type": "image",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/img-bonus.jpeg"
+      },
+      {
+        "id": "ff1ced1e-4057-4781-a31d-546a07b22d0e",
+        "type": "text",
+        "content": "E o melhor de tudo: o Pacote Completo é sempre atualizado com novas tendências, e quem escolhe o Pacote 3 ganha *acesso vitalício* para sempre! Ou seja, você nunca mais precisará gastar com outras apostilas na vida! 😍\n\nAgora é com você: escolha o pacote ideal para começar hoje mesmo e me envie o comprovante do PIX aqui embaixo. Eu libero seu acesso na mesma hora! Não deixe essa chance passar! 🚀\n\n📋 *DADOS DO PIX*:\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX:\n👇 Copia e cola abaixo 👇\n\n61982277206\n\nMe manda o comprovante do PIX e eu libero tudo na hora! 🎯"
+      },
+      {
+        "id": "d9c0e87d-79bf-4210-986a-3ad7618b3db3",
+        "type": "text",
+        "content": "*{primeiro_nome}*, seu pagamento de *R$ {valor_pago}* foi confirmado com sucesso! 🎉😍\n\n*{primeiro_nome}*, tenho uma surpresa super especial pra você! 🎁\n\nPor apenas mais *R$ 5,00* você leva o nosso *Kit Completo de Confeitaria* (que custa R$ 25,00)!\n\nNo kit completo você recebe:\n📹 Vídeo aulas passo a passo com o ponto certo dos recheios\n📚 Apostilas extras de brigadeiros premium, bolos no pote e geladinhos gourmet\n🍰 Método Como Ganhar Dinheiro com Fatias de Bolo\nE muito mais!\n\nÉ só fazer o PIX de *R$ 5,00* para o mesmo número celular:\n💰 *Chave PIX:* 61982277206\n\nSe preferir ficar apenas com as receitas que escolheu, basta digitar *\"não quero\"* ou *\"só as receitas\"* que já te peço os dados de acesso. O que você acha? 😊"
+      },
+      {
+        "id": "607227ac-c6ef-4aa5-ace9-ad9cadfe446c",
+        "type": "image",
+        "content": "https://dados.promentor21.top/Funil%20Recheios/img_upssel.png"
+      },
+      {
+        "id": "55a704a5-7b35-441e-b963-e88f6c1ef9bd",
+        "type": "text",
+        "content": "*{primeiro_nome}*, espero que você já esteja amando e aproveitando cada pedacinho da nossa área de membros! 😍🍰\n\nBut deixa eu te falar uma verdade sincera que eu aprendi na prática: de que adianta ter as receitas de recheios mais incríveis e cremosas do Brasil se a sua cozinha continuar vazia e sem encomendas? 🍰🤔 Ter receitas perfeitas é só metade do caminho. A outra metade — e a mais importante — é saber como atrair clientes prontos para comprar de você todos os dias!\n\nFoi por isso que eu criei o meu treinamento completo *Máquina de Vendas Online*! Nele, eu te entrego o roteiro exato para você usar o seu celular e o Instagram para lotar a sua agenda de clientes na sua cidade, mesmo que você esteja começando do absoluto zero e não queira gastar dinheiro com anúncios!\n\nEle é vendido normalmente por R$ 89,90, mas como você acabou de entrar para o nosso time, hoje eu consigo te liberar o acesso vitalício por apenas *R$ 14,50* adicionais!\n\nCaso você queira garantir essa oportunidade única, basta fazer o Pix de *R$ 14,50* abaixo e me enviar o comprovante aqui que eu te libero o acesso na hora! 🎯\n\n💰 *Pix (Celular):* 61982277206"
+      },
+      {
+        "id": "163da64c-7a96-485b-937b-bfaa8f81e25e",
+        "type": "text",
+        "content": "Tudo bem! O meu principal objetivo é te ajudar a crescer na confeitaria e faturar muito mais, a questão aqui não é só dinheiro. Por isso, de coração, eu vou te liberar todo o nosso *Kit Completo vitalício* de presente de qualquer forma! 💖🎁\n\nPara liberar seu cadastro no sistema, digite seu *Nome Completo* e seu melhor *E-mail* abaixo. 🎯"
+      },
+      {
+        "id": "3d7d32a9-593b-488e-bae2-2fbb81d9a666",
+        "type": "text",
+        "content": "Tudo bem! O meu principal objetivo é te ajudar a crescer na confeitaria e faturar muito mais, a questão aqui não é só dinheiro. Por isso, de coração, eu vou te liberar todo o nosso *Kit Completo vitalício* de presente de qualquer forma! 💖🎁\n\nPara liberar seu cadastro no sistema, digite seu *Nome Completo* e seu melhor *E-mail* abaixo. 🎯"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "ENAM",
+      "served_by_colo": "MIA",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.3091
+      },
+      "duration": 0.3091,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 60301312,
+      "rows_read": 35,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]
+
+
+STDERR:

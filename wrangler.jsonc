@@ -1,0 +1,65 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "automacao-zap",
+  "compatibility_date": "2026-04-27",
+  "main": "./workers/app.ts",
+  "observability": {
+    "enabled": true
+  },
+
+  // Variáveis de ambiente públicas
+  "vars": {
+    "APP_NAME": "AutomacaoZAP",
+    "JWT_EXPIRES_IN": "7d"
+  },
+
+  // Banco de dados D1
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "whatsapp-platform",
+      "database_id": "a24603e2-88a5-4cb4-854d-b87f03ad5ff0"
+    }
+  ],
+
+  // Storage R2
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "bucket_name": "whatsapp-platform-storage"
+    }
+  ],
+
+  // Cache e sessões KV
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "9a145369816b478ca39896a28a5c51cf"
+    }
+  ],
+
+  // Durable Objects para realtime do Chat
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CHAT_ROOM",
+        "class_name": "ChatRoom"
+      }
+    ]
+  },
+
+  // Migrations para Durable Objects
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ChatRoom"]
+    }
+  ],
+
+  "upload_source_maps": true,
+
+  // Cron Triggers para follow-ups automáticos
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  }
+}

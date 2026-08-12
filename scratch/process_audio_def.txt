@@ -1,0 +1,100 @@
+991: async function processAudioWithFallback(ctx: AutomationContext): Promise<string> {
+992:   const { message, automation, env, conversation, contact, state } = ctx;
+993: 
+994:   let resultText = "";
+995:   try {
+996:     const media = await downloadMedia(env.DB, automation.whatsapp_api_id, message.mediaId!, env.KV);
+997:     if (!media || !media.base64Data) {
+998:       resultText = '[Áudio recebido]';
+999:     } else {
+1000:       const configs = await getTranscriptionConfigsWithFallback(env.DB, automation.id, automation.transcription_service_id, env.KV);
+1001:       let transcription = "";
+1002:       let lastError = null;
+1003: 
+1004:       for (let i = 0; i < configs.length; i++) {
+1005:         const config = configs[i];
+1006:         try {
+1007:           console.log(`[Media] Tentando Transcrição de áudio com chave: ...${config.apiKey.slice(-5)} e endpoint: ${config.endpoint || 'padrão'}`);
+1008:           transcription = await transcribeAudio({
+1009:             apiKey: config.apiKey,
+1010:             audioBase64: media.base64Data,
+1011:             mimeType: media.mimetype || 'audio/ogg',
+1012:             endpoint: config.endpoint,
+1013:           });
+1014:           if (transcription && transcription.trim() !== "") {
+1015:             break;
+1016:           }
+1017:         } catch (err: any) {
+1018:           lastError = err;
+1019:           const msg = err?.message ?? String(err);
+1020:           // Gravar fallback de Transcrição se houver outro a tentar
+1021:           if (configs.length > 1 && i < configs.length - 1) {
+1022:             try {
+1023:               const nextConfig = configs[i + 1];
+1024:               await env.DB.prepare(`
+1025:                 INSERT INTO fallback_logs (automation_id, lead_phone, lead_name, product_name, fallback_type, details)
+1026:                 VALUES (?, ?, ?, ?, 'transcription', ?)
+1027:               `).bind(
+1028:                 automation.id,
+1029:                 contact.phone,
+1030:                 contact.name || state.client_name || 'unknown',
+1031:                 automation.product_name || 'Desconhecido',
+1032:                 `Falhou serviço de áudio ${i + 1} (...${config.apiKey.slice(-5)}). Erro: ${msg.substring(0, 150)}. Assumindo próximo serviço (...${nextConfig.apiKey.slice(-5)})`
+1033:               ).run();
+1034:             } catch (logErr) {
+1035:               console.error(`[Transcription Fallback Log] Erro:`, logErr);
+1036:             }
+1037:           }
+1038:         }
+1039:       }
+1040: 
+1041:       if (!transcription && lastError) {
+1042:         throw lastError;
+1043:       }
+1044: 
+1045:       resultText = `[Transcrição do áudio: ${transcription}]`;
+1046:     }
+1047:   } catch (error) {
+1048:     console.error('[Media] Falha na transcrição de áudio:', error);
+1049:     resultText = '[Áudio recebido - falha na transcrição]';
+1050:   }
+1051: 
+1052:   await updateLastEmptyMessage(env.DB, conversation.id, resultText);
+1053:   return resultText;
+1054: }
+1055: 
+1056: /**
+1057:  * Processa documento (PDF): baixa, executa OCR PDF com fallback e retorna texto
+1058:  */
+1059: async function processDocumentWithFallback(ctx: AutomationContext): Promise<string> {
+1060:   const { message, automation, env, conversation, contact, state } = ctx;
+1061: 
+1062:   let resultText = "";
+1063:   try {
+1064:     const media = await downloadMedia(env.DB, automation.whatsapp_api_id, message.mediaId!, env.KV);
+1065:     if (!media || !media.base64Data) {
+1066:       resultText = message.caption || '[Documento recebido]';
+1067:     } else {
+1068:       const keys = await getOcrApiKeysWithFallback(env.DB, automation.id, automation.ocr_service_id, env.KV);
+1069:       let ocrText = "";
+1070:       let lastError = null;
+1071: 
+1072:       for (let i = 0; i < keys.length; i++) {
+1073:         const key = keys[i];
+1074:         try {
+1075:           console.log(`[Media] Tentando OCR PDF com chave: ...${key.slice(-5)}`);
+1076:           ocrText = await ocrPdf({
+1077:             apiKey: key,
+1078:             pdfBase64: media.base64Data,
+1079:             mimeType: media.mimetype || 'application/pdf',
+1080:           });
+1081:           if (ocrText && ocrText.trim() !== "") {
+1082:             break;
+1083:           }
+1084:         } catch (err: any) {
+1085:           lastError = err;
+1086:           const msg = err?.message ?? String(err);
+1087:           // Gravar fallback de OCR PDF se houver outro a tentar
+1088:           if (keys.length > 1 && i < keys.length - 1) {
+1089:             try {
+1090:               const nextKey = keys[i + 1];

@@ -1,0 +1,260 @@
+142:   }
+143: }
+144: 
+145: // ============================================================
+146: // FUNNEL STAGES DYNAMIC DISPATCHER
+147: // ============================================================
+148: 
+149: /**
+150:  * Envia as mensagens de um determinado estágio de funil configurado no banco de dados.
+151:  */
+152: export async function sendFunnelStage(
+153:   db: D1Database,
+154:   whatsappApiId: string,
+155:   phone: string,
+156:   automation: any,
+157:   contact: any,
+158:   state: any,
+159:   stageKey: string,
+160:   kv: any,
+161:   extraVars: Record<string, string> = {},
+162:   skipAwait = false
+163: ): Promise<{ success: boolean; sent: boolean; messageLog: string[]; promises?: Promise<any>[] }> {
+164:   try {
+165:     const stage = await db.prepare(
+166:       "SELECT id, enabled, rewrite_mode, variations FROM automation_funnel_stages WHERE automation_id = ? AND stage_key = ?"
+167:     ).bind(automation.id, stageKey).first<{ id: string; enabled: number; rewrite_mode: string; variations: string }>();
+168: 
+169:     if (!stage || !stage.enabled) {
+170:       console.log(`[Funnel Stage] ${stageKey} para ${phone} está desativado ou não configurado.`);
+171:       return { success: true, sent: false, messageLog: [] };
+172:     }
+173: 
+174:     const fieldsRes = await db.prepare(
+175:       "SELECT * FROM automation_funnel_fields WHERE stage_id = ? ORDER BY sort_order ASC"
+176:     ).bind(stage.id).all<{ type: string; content: string; file_name: string | null }>();
+177:     const fields = fieldsRes.results || [];
+178: 
+179:     if (fields.length === 0) {
+180:       console.log(`[Funnel Stage] Nenhuns campos encontrados para ${stageKey}`);
+181:       return { success: true, sent: false, messageLog: [] };
+182:     }
+183: 
+184:     const messageLog: string[] = [];
+185:     const firstName = (contact.name || 'amiga').split(/\s+/)[0] || 'amiga';
+186:     const attendantName = (automation as any).attendant_name || 'Julia';
+187: 
+188:     const replaceVariables = (txt: string) => {
+189:       return txt
+190:         .replace(/{{primeiro_nome}}/g, firstName)
+191:         .replace(/{primeiro_nome}/g, firstName)
+192:         .replace(/{{primeiro_name}}/g, firstName)
+193:         .replace(/{primeiro_name}/g, firstName)
+194:         .replace(/{{nome}}/g, contact.name || 'amiga')
+195:         .replace(/{nome}/g, contact.name || 'amiga')
+196:         .replace(/{{email_cliente}}/g, extraVars.email || state.client_email || '')
+197:         .replace(/{email_cliente}/g, extraVars.email || state.client_email || '')
+198:         .replace(/{{valor_pago}}/g, extraVars.valor_pago || (state.total_paid ? state.total_paid.toString() : '10.00'))
+199:         .replace(/{valor_pago}/g, extraVars.valor_pago || (state.total_paid ? state.total_paid.toString() : '10.00'))
+200:         .replace(/{{valor}}/g, extraVars.valor_pago || (state.total_paid ? state.total_paid.toString() : '10.00'))
+201:         .replace(/{valor}/g, extraVars.valor_pago || (state.total_paid ? state.total_paid.toString() : '10.00'))
+202:         .replace(/Julia/g, attendantName);
+203:     };
+204: 
+205:     const promises: Promise<any>[] = [];
+206:     let i = 0;
+207:     while (i < fields.length) {
+208:       const field = fields[i];
+209: 
+210:       // Sleep between blocks (except for the first one)
+211:       if (i > 0) {
+212:         await sleep(1500);
+213:       }
+214:       
+215:       // Se for um documento/imagem/vídeo e o próximo também for, podemos agrupar todos os consecutivos
+216:       if (field.type === 'document' || field.type === 'image' || field.type === 'video') {
+217:         const batch = [field];
+218:         let j = i + 1;
+219:         while (j < fields.length && (fields[j].type === 'document' || fields[j].type === 'image' || fields[j].type === 'video')) {
+220:           batch.push(fields[j]);
+221:           j++;
+222:         }
+223:         
+224:         console.log(`[Funnel Stage] Enviando lote de ${batch.length} mídias em paralelo para ${phone}`);
+225:         const batchPromises = batch.map(f => {
+226:           if (f.type === 'document') {
+227:             return sendDocument(db, whatsappApiId, phone, f.content, f.file_name || 'apostila.pdf', kv, automation.id)
+228:               .catch(err => console.error(`[Funnel Stage] Erro ao enviar documento ${f.file_name}:`, err));
+229:           } else if (f.type === 'image') {
+230:             return sendImage(db, whatsappApiId, phone, f.content, f.file_name || undefined, kv, automation.id)
+231:               .catch(err => console.error(`[Funnel Stage] Erro ao enviar imagem:`, err));
+232:           } else {
+233:             return sendVideo(db, whatsappApiId, phone, f.content, f.file_name || undefined, kv, automation.id)
+234:               .catch(err => console.error(`[Funnel Stage] Erro ao enviar vídeo:`, err));
+235:           }
+236:         });
+237:         
+238:         promises.push(...batchPromises);
+239:         
+240:         // Registrar as mensagens enviadas
+241:         for (const f of batch) {
+242:           if (f.type === 'document') {
+243:             messageLog.push(`[PDF de receita enviado: ${f.file_name || 'documento'}]`);
+244:           } else if (f.type === 'image') {
+245:             messageLog.push(`[Imagem enviada]`);
+246:           } else {
+247:             messageLog.push(`[Vídeo enviado]`);
+248:           }
+249:         }
+250:         
+251:         // Avançar o ponteiro
+252:         i = j;
+253:       } else {
+254:         // Envio sequencial para texto e áudio
+255:         if (field.type === 'text') {
+256:           let textToSend = field.content;
+257:           if (stage.rewrite_mode === 'dynamic') {
+258:             try {
+259:               const dynList = await rewriteMessageViaLLM(db, automation.id, field.content, 1);
+260:               textToSend = dynList[0] || field.content;
+261:             } catch (err) {
+262:               console.error("[Funnel Message Dynamic Rewrite] Erro:", err);
+263:             }
+264:           } else if (stage.rewrite_mode === 'static' && stage.variations) {
+265:             try {
+266:               const vars = JSON.parse(stage.variations);
+267:               if (Array.isArray(vars) && vars.length > 0) {
+268:                 const charSum = phone.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+269:                 const idxVar = charSum % vars.length;
+270:                 textToSend = vars[idxVar] || field.content;
+271:               }
+272:             } catch (e) {
+273:               console.error("[Funnel Message Static Variations] Erro:", e);
+274:             }
+275:           }
+276:           
+277:           const formattedText = replaceVariables(textToSend);
+278:           const p = sendText(db, whatsappApiId, phone, formattedText, kv, automation.id)
+279:             .catch(err => console.error(`[Funnel Stage] Erro ao enviar texto:`, err));
+280:           promises.push(p);
+281:           messageLog.push(formattedText);
+282:         } else if (field.type === 'audio') {
+283:           const p = sendAudio(db, whatsappApiId, phone, field.content, kv, automation.id)
+284:             .catch(err => console.error(`[Funnel Stage] Erro ao enviar áudio:`, err));
+285:           promises.push(p);
+286:           messageLog.push(`[Áudio de entrega enviado]`);
+287:         }
+288:         
+289:         i++;
+290:       }
+291:     }
+292: 
+293:     if (skipAwait) {
+294:       console.log(`[Funnel Stage] Pulando await interno de ${promises.length} disparos para ${phone}.`);
+295:       return { success: true, sent: true, messageLog, promises };
+296:     }
+297: 
+298:     console.log(`[Funnel Stage] Aguardando a conclusão de todos os ${promises.length} disparos...`);
+299:     await Promise.all(promises);
+300:     console.log(`[Funnel Stage] Todos os disparos concluídos para ${phone}.`);
+301: 
+302:     return { success: true, sent: true, messageLog };
+303:   } catch (err) {
+304:     console.error(`[Funnel Stage] Erro ao enviar estágio ${stageKey}:`, err);
+305:     return { success: false, sent: false, messageLog: [] };
+306:   }
+307: }
+308: 
+309: // ============================================================
+310: // SEQ1 — Sequência de oferta inicial
+311: // ============================================================
+312: 
+313: async function executeSeq1(ctx: AutomationContext): Promise<{ success: boolean; result: string }> {
+314:   const { env, automation, contact, state } = ctx;
+315:   const db = env.DB;
+316:   const whatsappApiId = automation.whatsapp_api_id;
+317:   const phone = contact.phone;
+318:   const nome = contact.name || 'amiga';
+319:   const firstName = nome.split(/\s+/)[0] || 'amiga';
+320: 
+321:   // Verificar se SEQ1 já foi chamada (apenas para automação automática, não manual)
+322:   if (state.seq1_called && !ctx.isManual) {
+323:     return { success: true, result: 'SEQ1 já foi executada anteriormente.' };
+324:   }
+325: 
+326:   // Marcar como chamada
+327:   await updateState(db, state.conversation_id, {
+328:     seq1_called: 1,
+329:     phase: 'seq1_sent',
+330:     last_tool_called: 'seq1',
+331:   });
+332: 
+333:   // Marcar conversa como aberta
+334:   await db.prepare(
+335:     "UPDATE conversations SET status = 'open', updated_at = datetime('now') WHERE id = ?"
+336:   ).bind(state.conversation_id).run();
+337: 
+338:   // Disparar evento de Lead no Facebook Conversions API (CAPI)
+339:   if (automation.pixel_id && automation.facebook_token) {
+340:     const lead = await db.prepare(
+341:       'SELECT id, cliente_codigo FROM automation_leads WHERE phone = ? AND automation_id = ?'
+342:     ).bind(phone, automation.id).first<{ id: string; cliente_codigo: number | null }>();
+343:     const leadId = lead?.cliente_codigo ? String(lead.cliente_codigo) : (lead?.id || crypto.randomUUID());
+344:     const tracking = await getTrackingData(db, phone, automation.id);
+345: 
+346:     console.log(`[Facebook CAPI] Enviando evento Lead para ${phone} (Pixel: ${automation.pixel_id})`);
+347:     try {
+348:       const success = await sendLeadEvent(db, automation.id, automation.pixel_id, automation.facebook_token, {
+349:         phone,
+350:         name: nome,
+351:         trackingData: tracking,
+352:         leadId,
+353:         wabaId: automation.waba_id,
+354:         pageId: automation.page_id,
+355:         contentName: automation.product_name || 'recheios a prova de fogo',
+356:       });
+357:       console.log(`[Facebook CAPI] Evento Lead enviado com sucesso? ${success}`);
+358:     } catch (err) {
+359:       console.error(`[Facebook CAPI] Erro ao enviar evento Lead:`, err);
+360:     }
+361:   }
+362: 
+363:   // Tentar disparar o estágio 'welcome' dinâmico do banco
+364:   const stageRes = await sendFunnelStage(db, whatsappApiId, phone, automation, contact, state, 'welcome', env.KV);
+365: 
+366:   if (stageRes.sent) {
+367:     await saveAssistantMessages(db, state.conversation_id, stageRes.messageLog);
+368:   } else {
+369:     // Fallback legado
+370:     // Enviar apenas o áudio de oferta (se configurado)
+371:     if (MEDIA_URLS.seq1.audio) {
+372:       await sendAudio(db, whatsappApiId, phone, MEDIA_URLS.seq1.audio, env.KV);
+373:     }
+374: 
+375:     // Sleep de 3s para humanização e garantir que o áudio seja entregue antes do texto complementar
+376:     await sleep(3000);
+377: 
+378:     // 5 Variações premium do texto de boas-vindas (Seq1 / Anunciador)
+379:     const seq1Variations = [
+380:       `Oi, *${firstName}*! Tudo bem? Aqui é a Julia 😊\n\nVou te liberar agora as *200 receitas de recheios a frio* especiais!\n\nVocê confere primeiro e, se estiver tudo certo, depois faz o pagamento de *R$ 10,00.*\n\nE, se quiser ir além, depois eu também posso te mostrar o pacote completo — com receitas de tortinhas, Fatias de Feira mais vendidas, videoaulas e muito mais... 🍰\n\n👇 *Posso te enviar agora?* 🙏`,
+381:       `Olá, *${firstName}*! Tudo joia? Aqui é a Julia 😊\n\nPreparei para você as nossas famosas *200 receitas de recheios a frio*!\n\nO combinado é simples: você baixa as apostilas primeiro, confere tudo, e depois faz o Pix de *R$ 10,00* se gostar.\n\nE depois, se você quiser, eu te apresento o nosso Kit Completo com receitas de bolos no pote, fatias de feira campeãs de vendas e videoaulas de bônus... 🍰\n\n👇 *Posso fazer o envio agora?* 🙏`,
+382:       `Oi, *${firstName}*! Como vai? Julia aqui 😊\n\nJá separei as suas *200 receitas de recheios a frio* especiais para você começar!\n\nVocê recebe e avalia o material primeiro. Se gostar e achar que vale a pena, depois faz o pagamento de *R$ 10,00*.\n\nMais à frente, posso te mostrar o nosso Kit de Confeitaria completo, com bolos caseiros, videoaulas passo a passo e muito mais... 🍰\n\n👇 *Posso te mandar os arquivos agora?* 🙏`,
+383:       `Oi, *${firstName}*! Que bom falar com você! Aqui é a Julia 😊\n\nDeixei no ponto para você as *200 receitas de recheios a frio* que fazem o maior sucesso!\n\nVocê olha os arquivos primeiro e, se estiver tudo certinho, faz o Pix de *R$ 10,00* depois.\n\nE se você quiser crescer ainda mais nas vendas, depois eu te mostro o Kit Completo com receitas de brigadeiros, bolos caseirinhos e bônus incríveis... 🍰\n\n👇 *Posso enviar o seu acesso agora?* 🙏`,
+384:       `Olá, *${firstName}*! Tudo ótimo por aí? Julia por aqui 😊\n\nProntinha para receber as *200 receitas de recheios a frio* mais cremosas do Brasil?\n\nVocê baixa e testa primeiro, e depois faz o pagamento de *R$ 10,00* com total segurança.\n\nDepois posso te apresentar o nosso Kit Completo com fatias gourmet, bolos caseirinhos, videoaulas e suporte vitalício... 🍰\n\n👇 *Posso te liberar o envio agora?* 🙏`
+385:     ];
+386: 
+387:     const welcomeTextRaw = seq1Variations[Math.floor(Math.random() * seq1Variations.length)];
+388:     const attendantName = (automation as any).attendant_name || 'Julia';
+389:     const welcomeText = welcomeTextRaw.replace(/Julia/g, attendantName);
+390: 
+391:     // Enviar o texto de boas-vindas
+392:     await sendText(db, whatsappApiId, phone, welcomeText, env.KV);
+393:     
+394:     await saveAssistantMessages(db, state.conversation_id, [
+395:       '[Áudio de oferta enviado]',
+396:       welcomeText,
+397:     ]);
+398:   }
+399: 
+400:   // Cancelar follow-ups antigos se for disparo manual para não duplicar agendamentos
+401:   if (ctx.isManual) {

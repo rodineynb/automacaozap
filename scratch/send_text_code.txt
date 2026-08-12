@@ -1,0 +1,260 @@
+378:  * @param phone - Número do destinatário (formato internacional, ex: 5511999999999)
+379:  * @param text - Texto da mensagem
+380:  * @param kv - Namespace KV do Cloudflare
+381:  * @param automationId - ID da automação associada (opcional)
+382:  *
+383:  * @example
+384:  * ```ts
+385:  * await sendText(env.DB, 'api-id', '5511999999999', 'Olá, tudo bem?');
+386:  * ```
+387:  */
+388: export async function sendText(
+389:   db: D1Database,
+390:   whatsappApiId: string,
+391:   phone: string,
+392:   text: string,
+393:   kv?: KVNamespace,
+394:   automationId?: string
+395: ): Promise<string> {
+396:   try {
+397:     const api = await getAPIConfig(db, whatsappApiId, kv);
+398:     const provider = detectProvider(api.base_url);
+399: 
+400:     console.log(`[WhatsApp] Enviando texto para ${phone} via ${api.name} (${provider})`);
+401: 
+402:     const cleanedText = text ? text.replace(/\*\*/g, '*') : '';
+403: 
+404:     let result: string;
+405:     switch (provider) {
+406:       case 'uazapi':
+407:         result = await uazapi.sendText(api, phone, cleanedText);
+408:         break;
+409:       case 'evolution':
+410:       case 'generic':
+411:       default:
+412:         result = await evolution.sendText(api, phone, cleanedText);
+413:         break;
+414:     }
+415: 
+416:     await writeDispatchLog(db, phone, 'text', cleanedText, 'success', null, automationId);
+417:     return result;
+418:   } catch (err: any) {
+419:     console.error(`[WhatsApp] Erro ao enviar texto: ${err?.message ?? err}`);
+420:     await writeDispatchLog(db, phone, 'text', text ? text.replace(/\*\*/g, '*') : '', 'error', err?.message ?? String(err), automationId);
+421:     throw err;
+422:   }
+423: }
+424: 
+425: /**
+426:  * Envia uma imagem via WhatsApp.
+427:  *
+428:  * @param db - Instância do banco D1
+429:  * @param whatsappApiId - ID da API WhatsApp cadastrada
+430:  * @param phone - Número do destinatário
+431:  * @param imageUrl - URL pública da imagem
+432:  * @param caption - Legenda opcional
+433:  * @param kv - Namespace KV do Cloudflare
+434:  * @param automationId - ID da automação associada (opcional)
+435:  */
+436: export async function sendImage(
+437:   db: D1Database,
+438:   whatsappApiId: string,
+439:   phone: string,
+440:   imageUrl: string,
+441:   caption?: string,
+442:   kv?: KVNamespace,
+443:   automationId?: string
+444: ): Promise<string> {
+445:   const contentDesc = caption ? `[Imagem] ${caption} (${imageUrl})` : `[Imagem] ${imageUrl}`;
+446:   try {
+447:     const api = await getAPIConfig(db, whatsappApiId, kv);
+448:     const provider = detectProvider(api.base_url);
+449: 
+450:     console.log(`[WhatsApp] Enviando imagem para ${phone} via ${api.name} (${provider})`);
+451: 
+452:     let cleanedCaption = caption ? caption.replace(/\*\*/g, '*') : caption;
+453:     if (cleanedCaption && isFileName(cleanedCaption)) {
+454:       cleanedCaption = undefined;
+455:     }
+456: 
+457:     let result: string;
+458:     switch (provider) {
+459:       case 'uazapi':
+460:         result = await uazapi.sendImage(api, phone, imageUrl, cleanedCaption);
+461:         break;
+462:       case 'evolution':
+463:       case 'generic':
+464:       default:
+465:         result = await evolution.sendImage(api, phone, imageUrl, cleanedCaption);
+466:         break;
+467:     }
+468: 
+469:     const updatedContentDesc = cleanedCaption ? `[Imagem] ${cleanedCaption} (${imageUrl})` : `[Imagem] ${imageUrl}`;
+470:     await writeDispatchLog(db, phone, 'image', updatedContentDesc, 'success', null, automationId);
+471:     return result;
+472:   } catch (err: any) {
+473:     console.error(`[WhatsApp] Erro ao enviar imagem: ${err?.message ?? err}`);
+474:     const cleanedCaption = caption ? caption.replace(/\*\*/g, '*') : caption;
+475:     const updatedContentDesc = cleanedCaption ? `[Imagem] ${cleanedCaption} (${imageUrl})` : `[Imagem] ${imageUrl}`;
+476:     await writeDispatchLog(db, phone, 'image', updatedContentDesc, 'error', err?.message ?? String(err), automationId);
+477:     throw err;
+478:   }
+479: }
+480: 
+481: /**
+482:  * Envia um documento via WhatsApp.
+483:  *
+484:  * @param db - Instância do banco D1
+485:  * @param whatsappApiId - ID da API WhatsApp cadastrada
+486:  * @param phone - Número do destinatário
+487:  * @param docUrl - URL pública do documento
+488:  * @param fileName - Nome do arquivo para exibição
+489:  * @param kv - Namespace KV do Cloudflare
+490:  * @param automationId - ID da automação associada (opcional)
+491:  */
+492: export async function sendDocument(
+493:   db: D1Database,
+494:   whatsappApiId: string,
+495:   phone: string,
+496:   docUrl: string,
+497:   fileName: string,
+498:   kv?: KVNamespace,
+499:   automationId?: string
+500: ): Promise<string> {
+501:   const contentDesc = `[Documento] ${fileName} (${docUrl})`;
+502:   try {
+503:     const api = await getAPIConfig(db, whatsappApiId, kv);
+504:     const provider = detectProvider(api.base_url);
+505: 
+506:     console.log(`[WhatsApp] Enviando documento para ${phone} via ${api.name} (${provider})`);
+507: 
+508:     let result: string;
+509:     switch (provider) {
+510:       case 'uazapi':
+511:         result = await uazapi.sendDocument(api, phone, docUrl, fileName);
+512:         break;
+513:       case 'evolution':
+514:       case 'generic':
+515:       default:
+516:         result = await evolution.sendDocument(api, phone, docUrl, fileName);
+517:         break;
+518:     }
+519: 
+520:     await writeDispatchLog(db, phone, 'document', contentDesc, 'success', null, automationId);
+521:     return result;
+522:   } catch (err: any) {
+523:     console.error(`[WhatsApp] Erro ao enviar documento: ${err?.message ?? err}`);
+524:     await writeDispatchLog(db, phone, 'document', contentDesc, 'error', err?.message ?? String(err), automationId);
+525:     throw err;
+526:   }
+527: }
+528: 
+529: /**
+530:  * Envia um áudio via WhatsApp.
+531:  *
+532:  * @param db - Instância do banco D1
+533:  * @param whatsappApiId - ID da API WhatsApp cadastrada
+534:  * @param phone - Número do destinatário
+535:  * @param audioUrl - URL pública do áudio
+536:  * @param kv - Namespace KV do Cloudflare
+537:  * @param automationId - ID da automação associada (opcional)
+538:  */
+539: export async function sendAudio(
+540:   db: D1Database,
+541:   whatsappApiId: string,
+542:   phone: string,
+543:   audioUrl: string,
+544:   kv?: KVNamespace,
+545:   automationId?: string
+546: ): Promise<string> {
+547:   const contentDesc = `[Áudio] ${audioUrl}`;
+548:   try {
+549:     const api = await getAPIConfig(db, whatsappApiId, kv);
+550:     const provider = detectProvider(api.base_url);
+551: 
+552:     console.log(`[WhatsApp] Enviando áudio para ${phone} via ${api.name} (${provider})`);
+553: 
+554:     let result: string;
+555:     switch (provider) {
+556:       case 'uazapi':
+557:         result = await uazapi.sendAudio(api, phone, audioUrl);
+558:         break;
+559:       case 'evolution':
+560:       case 'generic':
+561:       default:
+562:         result = await evolution.sendAudio(api, phone, audioUrl);
+563:         break;
+564:     }
+565: 
+566:     await writeDispatchLog(db, phone, 'audio', contentDesc, 'success', null, automationId);
+567:     return result;
+568:   } catch (err: any) {
+569:     console.error(`[WhatsApp] Erro ao enviar áudio: ${err?.message ?? err}`);
+570:     await writeDispatchLog(db, phone, 'audio', contentDesc, 'error', err?.message ?? String(err), automationId);
+571:     throw err;
+572:   }
+573: }
+574: 
+575: /**
+576:  * Envia um vídeo via WhatsApp.
+577:  *
+578:  * @param db - Instância do banco D1
+579:  * @param whatsappApiId - ID da API WhatsApp cadastrada
+580:  * @param phone - Número do destinatário
+581:  * @param videoUrl - URL pública do vídeo
+582:  * @param caption - Legenda opcional
+583:  * @param kv - Namespace KV do Cloudflare
+584:  * @param automationId - ID da automação associada (opcional)
+585:  */
+586: export async function sendVideo(
+587:   db: D1Database,
+588:   whatsappApiId: string,
+589:   phone: string,
+590:   videoUrl: string,
+591:   caption?: string,
+592:   kv?: KVNamespace,
+593:   automationId?: string
+594: ): Promise<string> {
+595:   let cleanedCaption = caption ? caption.replace(/\*\*/g, '*') : caption;
+596:   if (cleanedCaption && isFileName(cleanedCaption)) {
+597:     cleanedCaption = undefined;
+598:   }
+599:   const contentDesc = cleanedCaption ? `[Vídeo] ${cleanedCaption} (${videoUrl})` : `[Vídeo] ${videoUrl}`;
+600:   try {
+601:     const api = await getAPIConfig(db, whatsappApiId, kv);
+602:     const provider = detectProvider(api.base_url);
+603: 
+604:     console.log(`[WhatsApp] Enviando vídeo para ${phone} via ${api.name} (${provider})`);
+605: 
+606:     let result: string;
+607:     switch (provider) {
+608:       case 'uazapi':
+609:         result = await uazapi.sendVideo(api, phone, videoUrl, cleanedCaption);
+610:         break;
+611:       case 'evolution':
+612:       case 'generic':
+613:       default:
+614:         result = await evolution.sendVideo(api, phone, videoUrl, cleanedCaption);
+615:         break;
+616:     }
+617: 
+618:     await writeDispatchLog(db, phone, 'video', contentDesc, 'success', null, automationId);
+619:     return result;
+620:   } catch (err: any) {
+621:     console.error(`[WhatsApp] Erro ao enviar vídeo: ${err?.message ?? err}`);
+622:     await writeDispatchLog(db, phone, 'video', contentDesc, 'error', err?.message ?? String(err), automationId);
+623:     throw err;
+624:   }
+625: }
+626: 
+627: /**
+628:  * Envia um botão nativo de PIX (exclusivo UAZAPI) ou fallback formatado em texto para outros provedores.
+629:  *
+630:  * @param db - Instância do banco D1
+631:  * @param whatsappApiId - ID da API WhatsApp cadastrada
+632:  * @param phone - Número do destinatário
+633:  * @param pixKey - Chave PIX
+634:  * @param pixType - Tipo da chave ('CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'EVP')
+635:  * @param pixName - Nome do recebedor (opcional)
+636:  * @param kv - Namespace KV
+637:  * @param automationId - ID da automação associada (opcional)

@@ -1,0 +1,110 @@
+586:   try {
+587:     await db.prepare(
+588:       "UPDATE automation_leads SET recebeu_acesso = 1, updated_at = datetime('now') WHERE phone = ? AND automation_id = ?"
+589:     ).bind(phone, automation.id).run();
+590:     console.log(`[Seq2] Marcado recebeu_acesso = 1 na tabela de leads para ${phone}`);
+591:   } catch (err) {
+592:     console.error(`[Seq2] Erro ao marcar recebeu_acesso na tabela de leads:`, err);
+593:   }
+594: 
+595:   // Sinalizar no KV que estamos entregando a sequência (bloqueia liberação precoce de Mutex)
+596:   const isDeliveringKey = `is_delivering_seq2:${automation.slug}:${phone}`;
+597:   await kv.put(isDeliveringKey, "true", { expirationTtl: 120 });
+598: 
+599:   const executeSeq2Async = async () => {
+600:     try {
+601:       const stageRes = await sendFunnelStage(db, whatsappApiId, phone, automation, contact, state, 'delivery', env.KV, {}, true);
+602: 
+603:       if (stageRes.sent) {
+604:         await saveAssistantMessages(db, state.conversation_id, stageRes.messageLog);
+605:         
+606:         const allPromises = [...(stageRes.promises || [])];
+607:         
+608:         // Espera mais 1.5s após os disparos anteriores antes de mandar o botão Pix para manter a ordem correta
+609:         await sleep(1500);
+610: 
+611:         try {
+612:           console.log(`[Seq2] Enviando botão nativo do Pix pós-estágio 'delivery' para ${phone}`);
+613:           const pixPromise = sendPixButton(db, whatsappApiId, phone, '61982277206', 'PHONE', 'R G FEITOSA 153DF', kv)
+614:             .catch(pixErr => console.error(`[Seq2] Erro ao enviar botão do Pix pós-estágio 'delivery':`, pixErr));
+615:           allPromises.push(pixPromise);
+616:         } catch (pixErr) {
+617:           console.error(`[Seq2] Erro ao criar promessa do botão do Pix pós-estágio 'delivery':`, pixErr);
+618:         }
+619: 
+620:         console.log(`[Seq2] Aguardando conclusão de todos os ${allPromises.length} disparos dinâmicos...`);
+621:         await Promise.all(allPromises);
+622:         console.log(`[Seq2] Todos os disparos dinâmicos concluídos com sucesso.`);
+623:       } else {
+624:         const allPromises: Promise<any>[] = [];
+625: 
+626:         // 1. Enviar os 5 PDFs
+627:         const pdfs = [
+628:           { url: 'https://dados.promentor21.top/Funil%20Recheios/Apostila%205.%20Recheios%20Sem%20Fog%C3%A3o%20(101%20Receitas).pdf', name: 'Apostila 5. Recheios Sem Fogão (101 Receitas).pdf' },
+629:           { url: 'https://dados.promentor21.top/Funil%20Recheios/Apostila%201.%20Recheios%20Sem%20Fog%C3%A3o%20(50%20Receitas).pdf', name: 'Apostila 1. Recheios Sem Fogão (50 Receitas).pdf' },
+630:           { url: 'https://dados.promentor21.top/Funil%20Recheios/Apostila%203.%20Recheios%20Sem%20Fog%C3%A3o%20(20%20Receitas).pdf', name: 'Apostila 3. Recheios Sem Fogão (20 Receitas).pdf' },
+631:           { url: 'https://dados.promentor21.top/Funil%20Recheios/Apostila%204.%20Recheios%20Sem%20Fog%C3%A3o%20(23%20Receitas).pdf', name: 'Apostila 4. Recheios Sem Fogão (23 Receitas).pdf' },
+632:           { url: 'https://dados.promentor21.top/Funil%20Recheios/Apostila%202.%20Recheios%20Sem%20Fog%C3%A3o%20(34%20Receitas).pdf', name: 'Apostila 2. Recheios Sem Fogão (34 Receitas).pdf' }
+633:         ];
+634: 
+635:         console.log(`[Seq2] Enviando 5 PDFs em paralelo para ${phone}`);
+636:         const pdfPromises = pdfs.map(pdf => 
+637:           sendDocument(db, whatsappApiId, phone, pdf.url, pdf.name, kv)
+638:         );
+639:         allPromises.push(...pdfPromises);
+640: 
+641:         // Salvar logs das receitas enviadas no D1 em lote único
+642:         const pdfLogs = pdfs.map(pdf => `[PDF de receita enviado: ${pdf.name}]`);
+643:         await saveAssistantMessages(db, state.conversation_id, pdfLogs);
+644: 
+645:         // Delay de 2 segundos para os PDFs começarem a carregar no WhatsApp do lead
+646:         console.log(`[Seq2] Aguardando delay de 2s pós-PDFs...`);
+647:         await sleep(2000);
+648: 
+649:         const isSpecialFollowupOffer = state.oferta_19_90_feita === 1 || 
+650:                                        state.funil_encerrado === 1 || 
+651:                                        state.last_tool_called === 'vigia' || 
+652:                                        state.last_tool_called === 'finalizador' ||
+653:                                        state.last_tool_called === 'cobrador_final';
+654: 
+655:         if (isSpecialFollowupOffer) {
+656:           let offerValue = '19,90';
+657:           if (state.last_tool_called === 'cobrador_final') {
+658:             offerValue = '10,00';
+659:           } else if (state.funil_encerrado === 1 || state.last_tool_called === 'finalizador') {
+660:             offerValue = '12,90';
+661:           } else if (state.oferta_19_90_feita === 1 || state.last_tool_called === 'vigia') {
+662:             offerValue = '19,90';
+663:           }
+664: 
+665:           const textRecovery = `*${firstName}*, já estou te entregando aqui em cima as apostilas do kit básico para você ir conferindo as receitas! 😍🍰\n\nEstou aguardando o seu Pix no valor da oferta especial de *R$ ${offerValue}* para liberar o seu acesso vitalício ao *Kit Completo* (com todas as videoaulas gravadas, apostilas extras, brigadeiros sem fogo e bônus)!\n\nAssim que você me mandar a foto do comprovante por aqui, eu ativo a sua conta na mesma hora! 🎯\n\n📋 *DADOS DO PIX*:\nTipo: *PIX Celular*\nNome: *R G FEITOSA 153DF*\nBanco: *Banco Cora*\nChave PIX:\n👇 Copia e cola abaixo 👇\n\n61982277206\n\nMe envia o comprovante aqui embaixo para liberarmos tudo! 🚀`;
+666:           
+667:           console.log(`[Seq2] Enviando Texto de Oferta Especial Recuperada para ${phone} (Valor: R$ ${offerValue})`);
+668:           const pTextRec = sendText(db, whatsappApiId, phone, textRecovery, kv);
+669:           allPromises.push(pTextRec);
+670:           await saveAssistantMessages(db, state.conversation_id, [textRecovery]);
+671: 
+672:           await sleep(1500);
+673: 
+674:           // Enviar Botão do Pix nativo
+675:           try {
+676:             console.log(`[Seq2] Enviando botão nativo do Pix pós-oferta especial para ${phone}`);
+677:             const pPixRec = sendPixButton(db, whatsappApiId, phone, '61982277206', 'PHONE', 'R G FEITOSA 153DF', kv)
+678:               .catch(pixErr => console.error(`[Seq2] Erro ao enviar botão do Pix pós-oferta especial:`, pixErr));
+679:             allPromises.push(pPixRec);
+680:           } catch (pixErr) {
+681:             console.error(`[Seq2] Erro ao enviar botão do Pix pós-oferta especial:`, pixErr);
+682:           }
+683:           
+684:           console.log(`[Seq2] Aguardando conclusão de todos os ${allPromises.length} disparos do fallback de recuperação...`);
+685:           await Promise.all(allPromises);
+686:           console.log(`[Seq2] Todos os disparos do fallback de recuperação concluídos.`);
+687:           return;
+688:         }
+689: 
+690:         // 2. Enviar Texto 1 (5 variações premium)
+691:         const text1Variations = [
+692:           `*${firstName}*, acabei de te enviar as *200 receitas de recheios a frio* que te prometi! Elas vão *transformar qualquer docinho simples* em uma verdadeira obra de arte lucrativa. Dá uma olhadinha nos arquivos acima! 🍰✨`,
+693:           `Prontinho, *${firstName}*! As suas *200 receitas de recheios a frio* já estão aí em cima. Preparei esse material com muito carinho para te ajudar a *mudar o nível dos seus doces* de forma prática! 😍🍰`,
+694:           `Tudo enviado com muito carinho, *${firstName}*! Estão aí em cima as *200 receitas de recheios a frio* que vão te ajudar a economizar muito gás e *multiplicar as suas encomendas* de forma simples e rápida! 🚀🍰`,
+695:           `Já estão em suas mãos, *${firstName}*! As *200 receitas de recheios a frio* foram enviadas com sucesso aqui em cima. Elas são a chave para você *faturar muito mais* na cozinha com total praticidade! 🧁✨`,

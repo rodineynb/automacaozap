@@ -1,0 +1,71 @@
+
+ ⛅️ wrangler 4.85.0 (update available 4.97.0)
+─────────────────────────────────────────────
+Resource location: remote 
+
+🌀 Executing on remote database whatsapp-platform (a24603e2-88a5-4cb4-854d-b87f03ad5ff0):
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+🚣 Executed 1 command in 0.17ms
+[
+  {
+    "results": [
+      {
+        "id": "844628ba-6872-48a8-a727-eecd67c0d746",
+        "name": "Satisfação",
+        "key": "satisfaction",
+        "message": "[{\"type\":\"text\",\"content\":\"Oi, {{nome}}! 😊\\n\\nTudo bem? Aqui é do {{produto}}. Passando pra saber se tá tudo certinho com o seu acesso!\\n\\nA gente tá sempre buscando melhorar, sabe? Então queria te pedir um favorzão rápido...\\n\\nO que te chamou mais atenção no nosso produto? O que fez você querer garantir o seu? 🤔\\n\\nPode falar à vontade, é só pra gente entender melhor e continuar melhorando cada vez mais! 💪\",\"file_name\":null}]"
+      },
+      {
+        "id": "72820f8e-7af3-49c9-a150-f0b5a4c99626",
+        "name": "Depoimento",
+        "key": "testimonial",
+        "message": "[{\"type\":\"text\",\"content\":\"E aí, {{nome}}! 😄\\n\\nJá faz uns dias que você tá com o {{produto}}... queria saber como tá sendo a experiência!\\n\\nSe puder, seria incrível se você gravasse um videozinho curtinho (pode ser de 30 segundinhos!) contando o que achou. 🎬\\n\\nSabe por quê? Tem muita gente que fica na dúvida de comprar pela internet, né? E ouvir de alguém que já comprou ajuda demais essas pessoas a tomarem a decisão!\\n\\nVocê estaria ajudando muita gente! Se preferir, pode mandar um áudio também, tá? 🎙️\\n\\nO que acha?\",\"file_name\":null}]"
+      },
+      {
+        "id": "eb3a179f-a5e2-4f87-8c89-ce9d81b3623b",
+        "name": "Objeções",
+        "key": "objection",
+        "message": "[{\"type\":\"text\",\"content\":\"Oi, {{nome}}! 😊\\n\\nTudo bem? A gente conversou sobre o {{produto}} e eu queria te pedir uma ajudinha...\\n\\nA gente tá fazendo uma pesquisinha rápida pra melhorar cada vez mais. Sem compromisso nenhum!\\n\\nPode me contar o que faltou pra você fechar? Foi o preço, o conteúdo, ou alguma outra coisa? 🤔\\n\\nQualquer feedback seu ajuda demais a gente aqui! 💛\",\"file_name\":null}]"
+      },
+      {
+        "id": "b0002e6a-4a31-4a40-aa28-511b68d9a747",
+        "name": "Satisfação",
+        "key": "satisfaction",
+        "message": "Oi, {{nome}}! 😊\n\nTudo bem? Aqui é do {{produto}}. Passando pra saber se tá tudo certinho com o seu acesso!\n\nA gente tá sempre buscando melhorar, sabe? Então queria te pedir um favorzão rápido...\n\nO que te chamou mais atenção no nosso produto? O que fez você querer garantir o seu? 🤔\n\nPode falar à vontade, é só pra gente entender melhor e continuar melhorando cada vez mais! 💪"
+      },
+      {
+        "id": "f68d3e2b-bb44-4927-9bb4-7eeba18a01c8",
+        "name": "Depoimento",
+        "key": "testimonial",
+        "message": "E aí, {{nome}}! 😄\n\nJá faz uns dias que você tá com o {{produto}}... queria saber como tá sendo a experiência!\n\nSe puder, seria incrível se você gravasse um videozinho curtinho (pode ser de 30 segundinhos!) contando o que achou. 🎬\n\nSabe por quê? Tem muita gente que fica na dúvida de comprar pela internet, né? E ouvir de alguém que já comprou ajuda demais essas pessoas a tomarem a decisão!\n\nVocê estaria ajudando muita gente! Se preferir, pode mandar um áudio também, tá? 🎙️\n\nO que acha?"
+      },
+      {
+        "id": "44c36e6e-b87c-4bfc-ba9f-153e89aa4cf4",
+        "name": "Objeções",
+        "key": "objection",
+        "message": "Oi, {{nome}}! 😊\n\nTudo bem? A gente conversou sobre o {{produto}} e eu queria te pedir uma ajudinha...\n\nA gente tá fazendo uma pesquisinha rápida pra melhorar cada vez mais. Sem compromisso nenhum!\n\nPode me contar o que faltou pra você fechar? Foi o preço, o conteúdo, ou alguma outra coisa? 🤔\n\nQualquer feedback seu ajuda demais a gente aqui! 💛"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "ENAM",
+      "served_by_colo": "MIA",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.1663
+      },
+      "duration": 0.1663,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 60301312,
+      "rows_read": 6,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]
+
+
+STDERR:

@@ -1,0 +1,582 @@
+﻿{
+    "Agente SDR":  {
+                       "main":  [
+                                    [
+                                        {
+                                            "node":  "Switch",
+                                            "type":  "main",
+                                            "index":  0
+                                        }
+                                    ],
+                                    [
+
+                                    ]
+                                ]
+                   },
+    "Think":  {
+                  "ai_tool":  [
+                                  [
+                                      {
+                                          "node":  "Agente SDR",
+                                          "type":  "ai_tool",
+                                          "index":  0
+                                      }
+                                  ]
+                              ]
+              },
+    "Switch":  {
+                   "main":  [
+                                [
+
+                                ],
+                                [
+
+                                ],
+                                [
+                                    {
+                                        "node":  "No Operation, do nothing1",
+                                        "type":  "main",
+                                        "index":  0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "node":  "particionaMensagem2",
+                                        "type":  "main",
+                                        "index":  0
+                                    }
+                                ]
+                            ]
+               },
+    "entradaChatwoot":  {
+                            "main":  [
+                                         [
+                                             {
+                                                 "node":  "Organiza Dados",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ]
+                                     ]
+                        },
+    "Return":  {
+                   "main":  [
+                                [
+                                    {
+                                        "node":  "Busca_Lead_Trackk",
+                                        "type":  "main",
+                                        "index":  0
+                                    }
+                                ]
+                            ]
+               },
+    "Puxar as Mensagens":  {
+                               "main":  [
+                                            [
+                                                {
+                                                    "node":  "15s",
+                                                    "type":  "main",
+                                                    "index":  0
+                                                }
+                                            ]
+                                        ]
+                           },
+    "Lista Mensagens1":  {
+                             "main":  [
+                                          [
+                                              {
+                                                  "node":  "Puxar as Mensagens",
+                                                  "type":  "main",
+                                                  "index":  0
+                                              }
+                                          ]
+                                      ]
+                         },
+    "Puxar as Mensagens1":  {
+                                "main":  [
+                                             [
+                                                 {
+                                                     "node":  "Parou de mandar mensagem",
+                                                     "type":  "main",
+                                                     "index":  0
+                                                 }
+                                             ]
+                                         ]
+                            },
+    "Parou de mandar mensagem":  {
+                                     "main":  [
+                                                  [
+                                                      {
+                                                          "node":  "Redis",
+                                                          "type":  "main",
+                                                          "index":  0
+                                                      }
+                                                  ],
+                                                  [
+                                                      {
+                                                          "node":  "No Operation, do nothing",
+                                                          "type":  "main",
+                                                          "index":  0
+                                                      }
+                                                  ]
+                                              ]
+                                 },
+    "Redis":  {
+                  "main":  [
+                               [
+                                   {
+                                       "node":  "Return",
+                                       "type":  "main",
+                                       "index":  0
+                                   }
+                               ]
+                           ]
+              },
+    "Organiza Dados":  {
+                           "main":  [
+                                        [
+                                            {
+                                                "node":  "Filter1",
+                                                "type":  "main",
+                                                "index":  0
+                                            },
+                                            {
+                                                "node":  "Filter2",
+                                                "type":  "main",
+                                                "index":  0
+                                            }
+                                        ]
+                                    ]
+                       },
+    "mensagem_tipo":  {
+                          "main":  [
+                                       [
+                                           {
+                                               "node":  "texto",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ],
+                                       [
+                                           {
+                                               "node":  "texto",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ],
+                                       [
+                                           {
+                                               "node":  "EnviaChatwootTextoS3",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ],
+                                       [
+                                           {
+                                               "node":  "BaixaImagem",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ],
+                                       [
+                                           {
+                                               "node":  "baixapdf",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ],
+                                       [
+                                           {
+                                               "node":  "pare",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ]
+                                   ]
+                      },
+    "rodineynb":  {
+                      "ai_languageModel":  [
+                                               [
+                                                   {
+                                                       "node":  "Agente SDR",
+                                                       "type":  "ai_languageModel",
+                                                       "index":  0
+                                                   }
+                                               ]
+                                           ]
+                  },
+    "xAI Grok Chat Model":  {
+                                "ai_languageModel":  [
+                                                         [
+
+                                                         ]
+                                                     ]
+                            },
+    "Pagamento":  {
+                      "ai_tool":  [
+                                      [
+                                          {
+                                              "node":  "Agente SDR",
+                                              "type":  "ai_tool",
+                                              "index":  0
+                                          }
+                                      ]
+                                  ]
+                  },
+    "memoriaRecheios":  {
+                            "ai_memory":  [
+                                              [
+                                                  {
+                                                      "node":  "Agente SDR",
+                                                      "type":  "ai_memory",
+                                                      "index":  0
+                                                  }
+                                              ]
+                                          ]
+                        },
+    "intervaloPartes":  {
+                            "main":  [
+                                         [
+                                             {
+                                                 "node":  "Loop Over Items",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ]
+                                     ]
+                        },
+    "Loop Over Items":  {
+                            "main":  [
+                                         [
+                                             {
+                                                 "node":  "Banco_Recheios",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ],
+                                         [
+                                             {
+                                                 "node":  "RespostaLead",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ]
+                                     ]
+                        },
+    "particionaMensagem2":  {
+                                "main":  [
+                                             [
+                                                 {
+                                                     "node":  "Loop Over Items",
+                                                     "type":  "main",
+                                                     "index":  0
+                                                 }
+                                             ]
+                                         ]
+                            },
+    "Postgres":  {
+                     "ai_tool":  [
+                                     [
+
+                                     ]
+                                 ]
+                 },
+    "Sistema":  {
+                    "ai_tool":  [
+                                    [
+                                        {
+                                            "node":  "Agente SDR",
+                                            "type":  "ai_tool",
+                                            "index":  0
+                                        }
+                                    ]
+                                ]
+                },
+    "Busca_Lead_Trackk":  {
+                              "main":  [
+                                           [
+                                               {
+                                                   "node":  "Agente SDR",
+                                                   "type":  "main",
+                                                   "index":  0
+                                               }
+                                           ]
+                                       ]
+                          },
+    "Organiza Dados1":  {
+                            "main":  [
+                                         [
+                                             {
+                                                 "node":  "Filter",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ]
+                                     ]
+                        },
+    "EnviaChatwootTextoS3":  {
+                                 "main":  [
+                                              [
+                                                  {
+                                                      "node":  "TranscreveAudio",
+                                                      "type":  "main",
+                                                      "index":  0
+                                                  }
+                                              ]
+                                          ]
+                             },
+    "Filter1":  {
+                    "main":  [
+                                 [
+                                     {
+                                         "node":  "Filter3",
+                                         "type":  "main",
+                                         "index":  0
+                                     }
+                                 ]
+                             ]
+                },
+    "Filter2":  {
+                    "main":  [
+                                 [
+                                     {
+                                         "node":  "EnviaTraqueamentoMeta",
+                                         "type":  "main",
+                                         "index":  0
+                                     }
+                                 ]
+                             ]
+                },
+    "15s":  {
+                "main":  [
+                             [
+                                 {
+                                     "node":  "Puxar as Mensagens1",
+                                     "type":  "main",
+                                     "index":  0
+                                 }
+                             ]
+                         ]
+            },
+    "baixapdf":  {
+                     "main":  [
+                                  [
+                                      {
+                                          "node":  "ocrpdfgoogle",
+                                          "type":  "main",
+                                          "index":  0
+                                      }
+                                  ]
+                              ]
+                 },
+    "ocrpdfgoogle":  {
+                         "main":  [
+                                      [
+                                          {
+                                              "node":  "uniao",
+                                              "type":  "main",
+                                              "index":  0
+                                          }
+                                      ],
+                                      [
+                                          {
+                                              "node":  "ocrpdfgoogle1",
+                                              "type":  "main",
+                                              "index":  0
+                                          }
+                                      ]
+                                  ]
+                     },
+    "uniao":  {
+                  "main":  [
+                               [
+                                   {
+                                       "node":  "Lista Mensagens1",
+                                       "type":  "main",
+                                       "index":  0
+                                   }
+                               ]
+                           ]
+              },
+    "texto":  {
+                  "main":  [
+                               [
+                                   {
+                                       "node":  "uniao",
+                                       "type":  "main",
+                                       "index":  0
+                                   }
+                               ]
+                           ]
+              },
+    "RespostaLead":  {
+                         "main":  [
+                                      [
+                                          {
+                                              "node":  "intervaloPartes",
+                                              "type":  "main",
+                                              "index":  0
+                                          }
+                                      ]
+                                  ]
+                     },
+    "BaixaImagem":  {
+                        "main":  [
+                                     [
+                                         {
+                                             "node":  "OcrImagemgoogle",
+                                             "type":  "main",
+                                             "index":  0
+                                         }
+                                     ]
+                                 ]
+                    },
+    "OcrImagemgoogle":  {
+                            "main":  [
+                                         [
+                                             {
+                                                 "node":  "uniao",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ],
+                                         [
+                                             {
+                                                 "node":  "OcrImagemgoogle1",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ]
+                                     ]
+                        },
+    "Filter3":  {
+                    "main":  [
+                                 [
+                                     {
+                                         "node":  "mensagem_tipo",
+                                         "type":  "main",
+                                         "index":  0
+                                     }
+                                 ]
+                             ]
+                },
+    "TranscreveAudio":  {
+                            "main":  [
+                                         [
+                                             {
+                                                 "node":  "uniao",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ],
+                                         [
+                                             {
+                                                 "node":  "TranscreveAudio1",
+                                                 "type":  "main",
+                                                 "index":  0
+                                             }
+                                         ]
+                                     ]
+                        },
+    "OpenRouter Chat Model":  {
+                                  "ai_languageModel":  [
+                                                           [
+
+                                                           ]
+                                                       ]
+                              },
+    "TranscreveAudio1":  {
+                             "main":  [
+                                          [
+                                              {
+                                                  "node":  "uniao",
+                                                  "type":  "main",
+                                                  "index":  0
+                                              }
+                                          ]
+                                      ]
+                         },
+    "OcrImagemgoogle1":  {
+                             "main":  [
+                                          [
+                                              {
+                                                  "node":  "uniao",
+                                                  "type":  "main",
+                                                  "index":  0
+                                              }
+                                          ]
+                                      ]
+                         },
+    "ocrpdfgoogle1":  {
+                          "main":  [
+                                       [
+                                           {
+                                               "node":  "uniao",
+                                               "type":  "main",
+                                               "index":  0
+                                           }
+                                       ]
+                                   ]
+                      },
+    "rodineynb1":  {
+                       "ai_languageModel":  [
+                                                [
+                                                    {
+                                                        "node":  "Agente SDR",
+                                                        "type":  "ai_languageModel",
+                                                        "index":  1
+                                                    }
+                                                ]
+                                            ]
+                   },
+    "SEQ1":  {
+                 "ai_tool":  [
+                                 [
+                                     {
+                                         "node":  "Agente SDR",
+                                         "type":  "ai_tool",
+                                         "index":  0
+                                     }
+                                 ]
+                             ]
+             },
+    "SEQ2":  {
+                 "ai_tool":  [
+                                 [
+                                     {
+                                         "node":  "Agente SDR",
+                                         "type":  "ai_tool",
+                                         "index":  0
+                                     }
+                                 ]
+                             ]
+             },
+    "DeepSeek":  {
+                     "ai_languageModel":  [
+                                              [
+
+                                              ]
+                                          ]
+                 },
+    "OpenAI Chat Model":  {
+                              "ai_languageModel":  [
+                                                       [
+
+                                                       ]
+                                                   ]
+                          },
+    "recebeu_acesso":  {
+                           "ai_tool":  [
+                                           [
+
+                                           ]
+                                       ]
+                       },
+    "DeepSeek1":  {
+                      "ai_languageModel":  [
+                                               [
+
+                                               ]
+                                           ]
+                  }
+}

@@ -1,0 +1,100 @@
+903:           trackingRecord.conjunto_anuncio_id = adInfo.conjunto_anuncio_id;
+904:           // Preferir nome real do anúncio da API ao invés do headline
+905:           if (adInfo.anuncio) trackingRecord.anuncio = adInfo.anuncio;
+906:           if (adInfo.anuncio_id) trackingRecord.anuncio_id = adInfo.anuncio_id;
+907:           console.log(`[AutomationEngine] Tracking enriched via Marketing API: campanha=${adInfo.campanha}, anuncio=${adInfo.anuncio}`);
+908:         }
+909:       } catch (err) {
+910:         console.error(`[AutomationEngine] Error enriching tracking with Marketing API:`, err);
+911:       }
+912:     }
+913:     
+914:     try {
+915:       await saveTrackingData(env.DB, message.phone, automation.id, trackingRecord);
+916:       console.log(`[AutomationEngine] Instant tracking data saved for ${message.phone} (campanha: ${trackingRecord.campanha}, anuncio: ${trackingRecord.anuncio}, ctwaclid: ${trackingRecord.ctwaclid})`);
+917:     } catch (err) {
+918:       console.error(`[AutomationEngine] Error saving instant tracking data:`, err);
+919:     }
+920:   }
+921: 
+922:   // 3.1. Verificar Mutex de Processamento
+923:   const processingKey = `processing:${automation.slug}:${message.phone}`;
+924:   const isProcessing = await env.KV.get(processingKey);
+925: 
+926:   if (isProcessing === "true") {
+927:     // Se a IA está formulando/enviando resposta ativa para este cliente,
+928:     // enfileirar a mensagem na fila assíncrona temporária para processamento sequencial.
+929:     const qKey = `queue:${automation.slug}:${message.phone}`;
+930:     const qExisting = await env.KV.get(qKey, "json") as IncomingMessage[] | null;
+931:     const qNew = qExisting ? [...qExisting, message] : [message];
+932:     await env.KV.put(qKey, JSON.stringify(qNew), { expirationTtl: DEBOUNCE_TTL_SECONDS });
+933:     await env.KV.put(`has_queued_messages:${automation.slug}:${message.phone}`, "true", { expirationTtl: DEBOUNCE_TTL_SECONDS });
+934: 
+935:     // --- SEGURANÇA ADICIONAL ---
+936:     // Salvar a mensagem no D1 IMEDIATAMENTE para garantir que ela nunca seja perdida se o worker principal crashar!
+937:     try {
+938:       const contact = await getOrCreateContact(env.DB, message.phone, message.senderName || '', automation.id, automation.whatsapp_number, automation.product_name);
+939:       const conversation = await getOrCreateConversation(env.DB, contact.id, automation.id, automation.product_name);
+940:       await saveMessage(env.DB, conversation.id, message.textContent, 'user', message.id);
+941:       console.log(`[AutomationEngine] Mensagem de ${message.phone} salva no D1 em background de segurança.`);
+942:     } catch (saveErr) {
+943:       console.error(`[AutomationEngine] Erro na salvaguarda de mensagem no D1:`, saveErr);
+944:     }
+945: 
+946:     console.log(`[AutomationEngine] Mensagem recebida durante processamento de ${message.phone}. Enfileirada.`);
+947:     return { status: 'queued', message: 'Mensagem enfileirada, IA ativa processando fluxo anterior', phone: message.phone };
+948:   }
+949: 
+950:   // 4. Debounce: adicionar ao buffer
+951:   const isFirst = await addToDebounce(env.KV, message.phone, automation.slug, message);
+952: 
+953:   if (!isFirst) {
+954:     // Já existe processamento agendado — esta mensagem será incluída
+955:     return { status: 'debounced', message: 'Mensagem adicionada ao buffer de debounce', phone: message.phone };
+956:   }
+957: 
+958:   // 5. É a primeira mensagem — retornar imediatamente e sinalizar para agendar
+959:   // O caller (webhook handler) deve usar waitUntil para agendar o processamento
+960:   return { status: 'processing', message: 'Processamento agendado', phone: message.phone };
+961: }
+962: 
+963: /**
+964:  * Processamento assíncrono após a janela de debounce.
+965:  * Deve ser chamado via `ctx.executionCtx.waitUntil(processMessageAsync(...))`.
+966:  *
+967:  * @param env - Bindings do Cloudflare
+968:  * @param automation - Dados da automação
+969:  * @param phone - Telefone do remetente
+970:  * @param slug - Slug da automação
+971:  */
+972: export async function processMessageAsync(
+973:   env: Env,
+974:   automation: AutomationContext['automation'],
+975:   phone: string,
+976:   slug: string
+977: ): Promise<void> {
+978:   const db = env.DB;
+979: 
+980:   try {
+981:     // Aguardar a janela de debounce (15 segundos)
+982:     await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_WINDOW_MS));
+983: 
+984:     // Recuperar todas as mensagens acumuladas
+985:     const messages = await getAndClearDebounce(env.KV, phone, slug);
+986: 
+987:     if (messages.length === 0) {
+988:       console.log(`[AutomationEngine] Nenhuma mensagem no buffer para ${phone}/${slug}`);
+989:       return;
+990:     }
+991: 
+992:     // Ativar o Mutex de Processamento no KV (auto-expiração em 60s)
+993:     const processingKey = `processing:${slug}:${phone}`;
+994:     await env.KV.put(processingKey, 'true', { expirationTtl: 60 });
+995: 
+996:     // Combinar textos das mensagens acumuladas
+997:     const combinedMessage = combineMessages(messages);
+998: 
+999:     // Tentar extrair dados de tracking de anúncios (Click to WhatsApp / CTWA)
+1000:     // NOTA: O tracking já é salvo instantaneamente em processIncomingMessage() (saveTrackingData).
+1001:     // Aqui apenas extraímos os dados para uso na criação do lead (UTM fields).
+1002:     let referralData: any = null;
